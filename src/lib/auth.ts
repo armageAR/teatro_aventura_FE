@@ -9,6 +9,33 @@ export interface User {
   updated_at: string;
 }
 
+export interface Role {
+  id: number;
+  name: string;
+  display_name?: string;
+  description?: string;
+}
+
+export interface UserWithRoles extends User {
+  roles: Role[];
+}
+
+export interface CreateUserData {
+  name: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+  role_ids: number[];
+}
+
+export interface UpdateUserData {
+  name?: string;
+  email?: string;
+  password?: string;
+  password_confirmation?: string;
+  role_ids?: number[];
+}
+
 export interface AuthResponse {
   access_token: string;
   token_type: string;
@@ -57,3 +84,60 @@ export const ROLE_EMOJIS = {
 } as const;
 
 export type UserRole = keyof typeof ROLE_ROUTES;
+
+export interface CompanySettings {
+  theme_color?: string;
+  max_functions_per_day?: number;
+  default_language?: string;
+  [key: string]: unknown;
+}
+
+export interface Company {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  website?: string;
+  logo_url?: string;
+  is_active: boolean;
+  settings?: CompanySettings;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateCompanyData {
+  name: string;
+  slug: string;
+  description?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  website?: string;
+  logo_url?: string;
+  is_active?: boolean;
+  settings?: CompanySettings;
+}
+
+export interface UpdateCompanyData {
+  name?: string;
+  slug?: string;
+  description?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  website?: string;
+  logo_url?: string;
+  is_active?: boolean;
+  settings?: CompanySettings;
+}
+
+export interface CompaniesResponse {
+  companies: Company[];
+}
+
+export interface CompanyResponse {
+  company: Company;
+}

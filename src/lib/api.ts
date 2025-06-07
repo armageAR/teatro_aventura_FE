@@ -3,8 +3,16 @@ import axios from 'axios';
 import {
   API_BASE_URL,
   AuthResponse,
+  CompaniesResponse,
+  CompanyResponse,
+  CreateCompanyData,
+  CreateUserData,
   LoginCredentials,
+  Role,
+  UpdateCompanyData,
+  UpdateUserData,
   UserRoles,
+  UserWithRoles,
 } from './auth';
 
 // Configuración de API según especificaciones del backend
@@ -92,6 +100,60 @@ export const authAPI = {
   getMyHistory: async () => {
     const response = await api.get('/my-history');
     return response.data;
+  },
+
+  // Endpoints para gestión de usuarios
+  getUsers: async (): Promise<UserWithRoles[]> => {
+    const response = await api.get('/users');
+    return response.data;
+  },
+
+  createUser: async (userData: CreateUserData): Promise<UserWithRoles> => {
+    const response = await api.post('/users', userData);
+    return response.data;
+  },
+
+  updateUser: async (
+    userId: number,
+    userData: UpdateUserData
+  ): Promise<UserWithRoles> => {
+    const response = await api.put(`/users/${userId}`, userData);
+    return response.data;
+  },
+
+  deleteUser: async (userId: number): Promise<void> => {
+    await api.delete(`/users/${userId}`);
+  },
+
+  // Endpoints para roles
+  getRoles: async (): Promise<Role[]> => {
+    const response = await api.get('/roles');
+    return response.data;
+  },
+
+  // Endpoints para gestión de compañías
+  getCompanies: async (): Promise<CompaniesResponse> => {
+    const response = await api.get('/companies');
+    return response.data;
+  },
+
+  createCompany: async (
+    companyData: CreateCompanyData
+  ): Promise<CompanyResponse> => {
+    const response = await api.post('/companies', companyData);
+    return response.data;
+  },
+
+  updateCompany: async (
+    companyId: number,
+    companyData: UpdateCompanyData
+  ): Promise<CompanyResponse> => {
+    const response = await api.put(`/companies/${companyId}`, companyData);
+    return response.data;
+  },
+
+  deleteCompany: async (companyId: number): Promise<void> => {
+    await api.delete(`/companies/${companyId}`);
   },
 };
 

@@ -59,7 +59,17 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             </p>
             <p className='text-sm text-gray-500 mb-6'>
               Tu rol actual:{' '}
-              <span className='font-medium'>{roles.join(', ')}</span>
+              <span className='font-medium'>
+                {roles.length > 0 ? roles.join(', ') : 'No hay roles asignados'}
+              </span>
+            </p>
+            <p className='text-xs text-gray-400 mb-6'>
+              Roles permitidos:{' '}
+              {allowedRoles?.join(', ') || 'Ninguno especificado'}
+            </p>
+            <p className='text-xs text-gray-400 mb-6'>
+              Debug: roles={JSON.stringify(roles)} | allowedRoles=
+              {JSON.stringify(allowedRoles)}
             </p>
             <button
               onClick={() => (window.location.href = '/')}

@@ -2,6 +2,7 @@
 
 import {
   ArrowRightOnRectangleIcon,
+  BuildingOfficeIcon,
   ChartBarIcon,
   CogIcon,
   UserGroupIcon,
@@ -32,14 +33,25 @@ export default function AdminDashboard() {
   const [dashboardData, setDashboardData] = useState<AdminDashboardData | null>(
     null
   );
+  const [totalCompanies, setTotalCompanies] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const data = await authAPI.getAdminDashboard();
-        setDashboardData(data);
+        const [dashboardResponse, companiesResponse] = await Promise.all([
+          authAPI.getAdminDashboard(),
+          authAPI.getCompanies(),
+        ]);
+
+        setDashboardData(dashboardResponse);
+
+        // Extraer el array de compañías y contar
+        const companiesArray = companiesResponse.companies || companiesResponse;
+        setTotalCompanies(
+          Array.isArray(companiesArray) ? companiesArray.length : 0
+        );
       } catch (error: unknown) {
         setError('Error al cargar los datos del dashboard');
         // eslint-disable-next-line no-console
@@ -164,16 +176,18 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className='bg-white rounded-lg shadow-sm p-6 border-t-4 border-yellow-500'>
+                <div className='bg-white rounded-lg shadow-sm p-6 border-t-4 border-orange-500'>
                   <div className='flex items-center'>
                     <div className='flex-shrink-0'>
-                      <ChartBarIcon className='h-8 w-8 text-yellow-600' />
+                      <BuildingOfficeIcon className='h-8 w-8 text-orange-600' />
                     </div>
                     <div className='ml-4'>
                       <p className='text-sm font-medium text-gray-500'>
-                        Estadísticas
+                        Total Compañías
                       </p>
-                      <p className='text-2xl font-bold text-gray-900'>100%</p>
+                      <p className='text-2xl font-bold text-gray-900'>
+                        {totalCompanies}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -253,14 +267,34 @@ export default function AdminDashboard() {
                 <h3 className='text-lg font-semibold text-gray-900 mb-4'>
                   Acciones Rápidas
                 </h3>
-                <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-                  <button className='p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left'>
+                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+                  <button
+                    onClick={() =>
+                      (window.location.href = '/admin-dashboard/users')
+                    }
+                    className='p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left'
+                  >
                     <div className='flex items-center mb-2'>
                       <UsersIcon className='h-5 w-5 text-purple-600 mr-2' />
                       <span className='font-medium'>Gestionar Usuarios</span>
                     </div>
                     <p className='text-sm text-gray-600'>
                       Crear, editar y eliminar usuarios del sistema
+                    </p>
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      (window.location.href = '/admin-dashboard/companies')
+                    }
+                    className='p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left'
+                  >
+                    <div className='flex items-center mb-2'>
+                      <UserGroupIcon className='h-5 w-5 text-purple-600 mr-2' />
+                      <span className='font-medium'>Gestionar Compañías</span>
+                    </div>
+                    <p className='text-sm text-gray-600'>
+                      Administrar compañías de teatro del sistema
                     </p>
                   </button>
 
