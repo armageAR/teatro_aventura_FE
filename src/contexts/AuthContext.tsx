@@ -44,6 +44,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       localStorage.setItem('token', authResponse.access_token);
 
       // Obtener roles del usuario
+      if (!authResponse.user.id) {
+        throw new Error('El usuario del login no tiene ID válido');
+      }
+
       const userRoles = await authAPI.getUserRoles(authResponse.user.id);
 
       setAuthState({
@@ -137,7 +141,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     try {
-      const user = await authAPI.getUser();
+      const user = await authAPI.getCurrentUser();
+
+      if (!user.id) {
+        throw new Error('El usuario no tiene ID válido');
+      }
+
       const userRoles = await authAPI.getUserRoles(user.id);
 
       setAuthState({

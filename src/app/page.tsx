@@ -8,13 +8,42 @@ import {
 } from '@heroicons/react/24/outline';
 import React, { useState } from 'react';
 
+import { ROLE_EMOJIS, ROLE_ROUTES, UserRole } from '@/lib/auth';
+
 import { LoginModal } from '@/components/LoginModal';
 
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Home() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, roles } = useAuth();
+
+  // Función para obtener la ruta del dashboard según el rol
+  const getDashboardRoute = () => {
+    if (roles.length > 0) {
+      const primaryRole = roles[0] as UserRole;
+      return ROLE_ROUTES[primaryRole];
+    }
+    return '/';
+  };
+
+  // Función para obtener el emoji del rol principal
+  const getRoleEmoji = () => {
+    if (roles.length > 0) {
+      const primaryRole = roles[0] as UserRole;
+      return ROLE_EMOJIS[primaryRole];
+    }
+    return '👤';
+  };
+
+  // Función para obtener el nombre del rol principal
+  const getRoleName = () => {
+    if (roles.length > 0) {
+      const primaryRole = roles[0] as UserRole;
+      return primaryRole.charAt(0).toUpperCase() + primaryRole.slice(1);
+    }
+    return 'Usuario';
+  };
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-purple-50 to-blue-50'>
@@ -35,6 +64,13 @@ export default function Home() {
                   <span className='text-sm text-gray-600'>
                     Hola, <span className='font-medium'>{user?.name}</span>
                   </span>
+                  <button
+                    onClick={() => (window.location.href = getDashboardRoute())}
+                    className='bg-purple-600 text-white px-4 py-2 rounded-md text-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 flex items-center'
+                  >
+                    <span className='mr-2'>{getRoleEmoji()}</span>
+                    Mi Dashboard
+                  </button>
                   <button
                     onClick={logout}
                     className='bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500'
@@ -81,7 +117,21 @@ export default function Home() {
             </div>
           </div>
 
-          {!isAuthenticated && (
+          {isAuthenticated ? (
+            <div className='flex flex-col items-center space-y-4'>
+              <p className='text-lg text-gray-700 mb-2'>
+                ¡Bienvenido de nuevo,{' '}
+                <span className='font-semibold'>{user?.name}</span>!
+              </p>
+              <button
+                onClick={() => (window.location.href = getDashboardRoute())}
+                className='bg-purple-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center'
+              >
+                <span className='mr-3 text-2xl'>{getRoleEmoji()}</span>
+                Ir a mi Dashboard de {getRoleName()}
+              </button>
+            </div>
+          ) : (
             <button
               onClick={() => setIsLoginModalOpen(true)}
               className='bg-purple-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-lg transform hover:scale-105 transition-all duration-200'

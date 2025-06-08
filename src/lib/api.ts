@@ -3,16 +3,28 @@ import axios from 'axios';
 import {
   API_BASE_URL,
   AuthResponse,
+  ChangeRoleData,
+  ChangeRoleResponse,
   CompaniesResponse,
   CompanyResponse,
   CreateCompanyData,
   CreateUserData,
+  CreateUserResponse,
+  DeleteUserResponse,
   LoginCredentials,
+  ResetPasswordData,
+  ResetPasswordResponse,
   Role,
+  SearchUsersResponse,
   UpdateCompanyData,
   UpdateUserData,
+  UpdateUserResponse,
+  User,
+  UserFilters,
+  UserResponse,
   UserRoles,
-  UserWithRoles,
+  UsersListResponse,
+  UserStatistics,
 } from './auth';
 
 // Configuración de API según especificaciones del backend
@@ -72,7 +84,7 @@ export const authAPI = {
     return response.data;
   },
 
-  getUser: async () => {
+  getCurrentUser: async (): Promise<User> => {
     const response = await api.get('/user');
     return response.data;
   },
@@ -103,12 +115,29 @@ export const authAPI = {
   },
 
   // Endpoints para gestión de usuarios
-  getUsers: async (): Promise<UserWithRoles[]> => {
-    const response = await api.get('/users');
+  getUsers: async (filters?: UserFilters): Promise<UsersListResponse> => {
+    const params = new URLSearchParams();
+    if (filters?.role) params.append('role', filters.role);
+    if (filters?.company_id)
+      params.append('company_id', filters.company_id.toString());
+    if (filters?.search) params.append('search', filters.search);
+    if (filters?.per_page)
+      params.append('per_page', filters.per_page.toString());
+    if (filters?.page) params.append('page', filters.page.toString());
+
+    const queryString = params.toString();
+    const response = await api.get(
+      `/users${queryString ? `?${queryString}` : ''}`
+    );
     return response.data;
   },
 
-  createUser: async (userData: CreateUserData): Promise<UserWithRoles> => {
+  getUser: async (userId: number): Promise<UserResponse> => {
+    const response = await api.get(`/users/${userId}`);
+    return response.data;
+  },
+
+  createUser: async (userData: CreateUserData): Promise<CreateUserResponse> => {
     const response = await api.post('/users', userData);
     return response.data;
   },
@@ -116,19 +145,67 @@ export const authAPI = {
   updateUser: async (
     userId: number,
     userData: UpdateUserData
-  ): Promise<UserWithRoles> => {
+  ): Promise<UpdateUserResponse> => {
     const response = await api.put(`/users/${userId}`, userData);
     return response.data;
   },
 
-  deleteUser: async (userId: number): Promise<void> => {
-    await api.delete(`/users/${userId}`);
+  deleteUser: async (userId: number): Promise<DeleteUserResponse> => {
+    const response = await api.delete(`/users/${userId}`);
+    return response.data;
+  },
+
+  // Nuevos endpoints específicos
+  changeUserRole: async (
+    userId: number,
+    roleData: ChangeRoleData
+  ): Promise<ChangeRoleResponse> => {
+    const response = await api.post(`/users/${userId}/change-role`, roleData);
+    return response.data;
+  },
+
+  resetUserPassword: async (
+    userId: number,
+    passwordData: ResetPasswordData
+  ): Promise<ResetPasswordResponse> => {
+    const response = await api.post(
+      `/users/${userId}/reset-password`,
+      passwordData
+    );
+    return response.data;
+  },
+
+  getUserStatistics: async (): Promise<UserStatistics> => {
+    const response = await api.get('/users/statistics');
+    return response.data;
+  },
+
+  searchUsers: async (
+    query: string,
+    limit = 10
+  ): Promise<SearchUsersResponse> => {
+    const response = await api.get(
+      `/users/search?q=${encodeURIComponent(query)}&limit=${limit}`
+    );
+    return response.data;
   },
 
   // Endpoints para roles
   getRoles: async (): Promise<Role[]> => {
     const response = await api.get('/roles');
-    return response.data;
+    console.log('🔍 getRoles raw response:', response.data);
+
+    // Manejar diferentes formatos de respuesta
+    if (Array.isArray(response.data)) {
+      return response.data;
+    } else if (response.data && Array.isArray(response.data.roles)) {
+      return response.data.roles;
+    } else if (response.data && Array.isArray(response.data.data)) {
+      return response.data.data;
+    } else {
+      console.warn('❌ Formato de roles inesperado en API:', response.data);
+      return [];
+    }
   },
 
   // Endpoints para gestión de compañías

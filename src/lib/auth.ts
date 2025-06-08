@@ -4,13 +4,14 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  email_verified_at: string | null;
+  company_id: number | null;
+  email_verified_at?: string | null;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
 }
 
 export interface Role {
-  id: number;
+  id?: number;
   name: string;
   display_name?: string;
   description?: string;
@@ -18,6 +19,11 @@ export interface Role {
 
 export interface UserWithRoles extends User {
   roles: Role[];
+  company?: {
+    id: number;
+    name: string;
+    slug: string;
+  };
 }
 
 export interface CreateUserData {
@@ -25,7 +31,8 @@ export interface CreateUserData {
   email: string;
   password: string;
   password_confirmation: string;
-  role_ids: number[];
+  role: string;
+  company_id?: number;
 }
 
 export interface UpdateUserData {
@@ -33,7 +40,100 @@ export interface UpdateUserData {
   email?: string;
   password?: string;
   password_confirmation?: string;
-  role_ids?: number[];
+  company_id?: number;
+}
+
+// Interfaces para respuestas de las APIs de usuarios
+export interface UsersListResponse {
+  users: UserWithRoles[];
+  pagination: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number;
+    to: number;
+  };
+  filters_applied: {
+    role?: string;
+    search?: string;
+    company_id?: number;
+  };
+  can_view_all_companies: boolean;
+}
+
+export interface UserResponse {
+  user: UserWithRoles;
+  permissions?: string[];
+}
+
+export interface CreateUserResponse {
+  message: string;
+  user: UserWithRoles;
+}
+
+export interface UpdateUserResponse {
+  message: string;
+  user: UserWithRoles;
+}
+
+export interface DeleteUserResponse {
+  message: string;
+}
+
+export interface ChangeRoleData {
+  role: string;
+}
+
+export interface ChangeRoleResponse {
+  message: string;
+  user: UserWithRoles;
+}
+
+export interface ResetPasswordData {
+  password: string;
+  password_confirmation: string;
+}
+
+export interface ResetPasswordResponse {
+  message: string;
+}
+
+export interface UserStatistics {
+  total_users?: number;
+  company_name?: string;
+  users_by_role: Array<{
+    role: string;
+    count: number;
+  }>;
+  users_by_company?: Array<{
+    company: string;
+    count: number;
+  }>;
+  recent_users: Array<{
+    id: number;
+    name: string;
+    email: string;
+    created_at: string;
+    roles: Role[];
+    company?: {
+      name: string;
+    };
+  }>;
+}
+
+export interface SearchUsersResponse {
+  users: UserWithRoles[];
+  query: string;
+  total_found: number;
+}
+
+export interface UserFilters {
+  role?: string;
+  company_id?: number;
+  search?: string;
+  per_page?: number;
+  page?: number;
 }
 
 export interface AuthResponse {
@@ -96,16 +196,17 @@ export interface Company {
   id: number;
   name: string;
   slug: string;
-  description?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-  website?: string;
-  logo_url?: string;
+  description: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  website: string | null;
+  logo_url: string | null;
   is_active: boolean;
-  settings?: CompanySettings;
+  settings: CompanySettings | null;
   created_at: string;
   updated_at: string;
+  users: User[];
 }
 
 export interface CreateCompanyData {
