@@ -90,27 +90,27 @@ export const authAPI = {
   },
 
   getUserRoles: async (userId: number): Promise<UserRoles> => {
-    const response = await api.get(`/user/${userId}/roles`);
+    const response = await api.get(`/roles/user/${userId}`);
     return response.data;
   },
 
   getAdminDashboard: async () => {
-    const response = await api.get('/admin-dashboard');
+    const response = await api.get('/admin/dashboard');
     return response.data;
   },
 
   getProducerDashboard: async () => {
-    const response = await api.get('/producer-dashboard');
+    const response = await api.get('/producer/dashboard');
     return response.data;
   },
 
   getDirectorDashboard: async () => {
-    const response = await api.get('/director-dashboard');
+    const response = await api.get('/director/dashboard');
     return response.data;
   },
 
   getMyHistory: async () => {
-    const response = await api.get('/my-history');
+    const response = await api.get('/spectator/my-history');
     return response.data;
   },
 
