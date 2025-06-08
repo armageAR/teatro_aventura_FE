@@ -193,7 +193,6 @@ export const authAPI = {
   // Endpoints para roles
   getRoles: async (): Promise<Role[]> => {
     const response = await api.get('/roles');
-    console.log('🔍 getRoles raw response:', response.data);
 
     // Manejar diferentes formatos de respuesta
     if (Array.isArray(response.data)) {
