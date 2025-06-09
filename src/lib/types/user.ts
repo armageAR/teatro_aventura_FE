@@ -1,3 +1,4 @@
+import constants from '@/lib/constants';
 import { Pagination } from '@/lib/types/pagination';
 import { Role } from '@/lib/types/role';
 
@@ -110,3 +111,5 @@ export interface UserFilters {
   per_page?: number;
   page?: number;
 }
+
+export type UserRole = keyof typeof constants.roles.routes;

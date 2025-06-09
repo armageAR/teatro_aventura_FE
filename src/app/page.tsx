@@ -8,7 +8,8 @@ import {
 } from '@heroicons/react/24/outline';
 import React, { useState } from 'react';
 
-import { ROLE_EMOJIS, ROLE_ROUTES, UserRole } from '@/lib/types/auth';
+import constants from '@/lib/constants';
+import { UserRole } from '@/lib/types/user';
 
 import { LoginModal } from '@/components/LoginModal';
 
@@ -22,7 +23,7 @@ export default function Home() {
   const getDashboardRoute = () => {
     if (roles.length > 0) {
       const primaryRole = roles[0] as UserRole;
-      return ROLE_ROUTES[primaryRole];
+      return constants.roles.routes[primaryRole];
     }
     return '/';
   };
@@ -31,7 +32,7 @@ export default function Home() {
   const getRoleEmoji = () => {
     if (roles.length > 0) {
       const primaryRole = roles[0] as UserRole;
-      return ROLE_EMOJIS[primaryRole];
+      return constants.roles.emojis[primaryRole];
     }
     return '👤';
   };

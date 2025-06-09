@@ -4,12 +4,9 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import { authAPI } from '@/lib/api';
-import {
-  AuthState,
-  LoginCredentials,
-  ROLE_ROUTES,
-  UserRole,
-} from '@/lib/types/auth';
+import constants from '@/lib/constants';
+import { AuthState, LoginCredentials } from '@/lib/types/auth';
+import { UserRole } from '@/lib/types/user';
 
 interface AuthContextType extends AuthState {
   login: (credentials: LoginCredentials) => Promise<void>;
@@ -66,7 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // Redirigir según el rol principal
       const primaryRole = userRoles.roles[0] as UserRole;
-      const redirectRoute = ROLE_ROUTES[primaryRole];
+      const redirectRoute = constants.roles.routes[primaryRole];
 
       if (redirectRoute) {
         window.location.href = redirectRoute;
