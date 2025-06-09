@@ -5,13 +5,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import { authAPI } from '@/lib/api';
-import {
-  CompaniesResponse,
-  Company,
-  CreateUserData,
-  Role,
-  UserWithRoles,
-} from '@/lib/auth';
+import { CompaniesResponse, Company } from '@/lib/types/company';
+import { Pagination } from '@/lib/types/pagination';
+import { Role } from '@/lib/types/role';
+import { CreateUserData, UserWithRoles } from '@/lib/types/user';
+import { UpdateUserData } from '@/lib/types/user';
 
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -19,14 +17,6 @@ import { UserFormDialog } from '@/components/Users/UserFormDialog';
 import { UsersTable } from '@/components/Users/UsersTable';
 
 import { handleApiError } from '@/utils/handleApiError';
-
-export interface UserUpdateData {
-  name: string;
-  email: string;
-  company_id: number | undefined;
-  password?: string;
-  password_confirmation?: string;
-}
 
 export default function UsersAdministration() {
   const [users, setUsers] = useState<UserWithRoles[]>([]);
@@ -40,7 +30,7 @@ export default function UsersAdministration() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState('');
   const [selectedCompany, setSelectedCompany] = useState('');
-  const [pagination, setPagination] = useState({
+  const [pagination, setPagination] = useState<Pagination>({
     current_page: 1,
     last_page: 1,
     per_page: 15,
@@ -169,7 +159,7 @@ export default function UsersAdministration() {
     try {
       if (isEditing && editingUser) {
         // Preparar datos para edición (sin contraseña si está vacía)
-        const updateData: UserUpdateData = {
+        const updateData: UpdateUserData = {
           name: formData.name,
           email: formData.email,
           company_id: formData.company_id,

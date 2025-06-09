@@ -4,7 +4,12 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import { authAPI } from '@/lib/api';
-import { AuthState, LoginCredentials, ROLE_ROUTES, UserRole } from '@/lib/auth';
+import {
+  AuthState,
+  LoginCredentials,
+  ROLE_ROUTES,
+  UserRole,
+} from '@/lib/types/auth';
 
 interface AuthContextType extends AuthState {
   login: (credentials: LoginCredentials) => Promise<void>;

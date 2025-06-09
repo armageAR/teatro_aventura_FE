@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import { authAPI } from '@/lib/api';
-import { Company, CreateCompanyData } from '@/lib/auth';
+import { Company, CreateCompanyData } from '@/lib/types/company';
 
 import ProtectedRoute from '@/components/ProtectedRoute';
 

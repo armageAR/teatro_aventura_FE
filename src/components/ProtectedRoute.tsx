@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 
-import { UserRole } from '@/lib/auth';
+import { UserRole } from '@/lib/types/auth';
 
 import { useAuth } from '@/contexts/AuthContext';
 

@@ -8,7 +8,7 @@ import {
 } from '@heroicons/react/24/outline';
 import React, { useState } from 'react';
 
-import { ROLE_EMOJIS, ROLE_ROUTES, UserRole } from '@/lib/auth';
+import { ROLE_EMOJIS, ROLE_ROUTES, UserRole } from '@/lib/types/auth';
 
 import { LoginModal } from '@/components/LoginModal';
 

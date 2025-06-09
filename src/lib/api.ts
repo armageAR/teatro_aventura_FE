@@ -3,20 +3,22 @@ import axios from 'axios';
 import {
   API_BASE_URL,
   AuthResponse,
-  ChangeRoleData,
-  ChangeRoleResponse,
-  CompaniesResponse,
-  CompanyResponse,
-  CreateCompanyData,
-  CreateUserData,
-  CreateUserResponse,
-  DeleteUserResponse,
   LoginCredentials,
   ResetPasswordData,
   ResetPasswordResponse,
-  Role,
-  SearchUsersResponse,
+} from './types/auth';
+import {
+  CompaniesResponse,
+  CompanyResponse,
+  CreateCompanyData,
   UpdateCompanyData,
+} from './types/company';
+import { ChangeRoleData, ChangeRoleResponse, Role } from './types/role';
+import {
+  CreateUserData,
+  CreateUserResponse,
+  DeleteUserResponse,
+  SearchUsersResponse,
   UpdateUserData,
   UpdateUserResponse,
   User,
@@ -25,7 +27,7 @@ import {
   UserRoles,
   UsersListResponse,
   UserStatistics,
-} from './auth';
+} from './types/user';
 
 // Configuración de API según especificaciones del backend
 const api = axios.create({

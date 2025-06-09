@@ -6,22 +6,16 @@ import {
 } from '@heroicons/react/24/outline';
 import React from 'react';
 
-import { Company, Role, UserWithRoles } from '@/lib/auth';
-
-export interface PaginationData {
-  current_page: number;
-  last_page: number;
-  per_page: number;
-  total: number;
-  from: number;
-  to: number;
-}
+import { Company } from '@/lib/types/company';
+import { Pagination } from '@/lib/types/pagination';
+import { Role } from '@/lib/types/role';
+import { UserWithRoles } from '@/lib/types/user';
 
 export interface UsersTableProps {
   users: UserWithRoles[];
   roles: Role[];
   companies: Company[];
-  pagination: PaginationData;
+  pagination: Pagination;
   searchTerm: string;
   setSearchTerm: (value: string) => void;
   selectedRole: string;
@@ -32,7 +26,7 @@ export interface UsersTableProps {
   handleChangeUserRole: (userId: number, role: string) => void;
   handleResetPassword: (userId: number, name: string) => void;
   handleDeleteUser: (userId: number) => void;
-  setPagination: (pagination: PaginationData) => void;
+  setPagination: (pagination: Pagination) => void;
 }
 
 export function UsersTable({

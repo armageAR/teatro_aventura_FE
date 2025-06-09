@@ -1,7 +1,9 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import React from 'react';
 
-import type { Company, CreateUserData, Role } from '@/lib/auth';
+import type { Company } from '@/lib/types/company';
+import { Role } from '@/lib/types/role';
+import { CreateUserData } from '@/lib/types/user';
 
 import {
   Dialog,
