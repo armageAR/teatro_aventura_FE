@@ -8,43 +8,23 @@ import {
 } from '@heroicons/react/24/outline';
 import React, { useState } from 'react';
 
-import constants from '@/lib/constants';
-import { UserRole } from '@/lib/types/user';
-
 import { LoginModal } from '@/components/LoginModal';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { getDashboardRoute, getRoleEmoji, getRoleName } from '@/utils/role';
 
 export default function Home() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const { isAuthenticated, user, logout, roles } = useAuth();
+  const { isAuthenticated, user, logout, roles, isLoading } = useAuth();
 
-  // Función para obtener la ruta del dashboard según el rol
-  const getDashboardRoute = () => {
-    if (roles.length > 0) {
-      const primaryRole = roles[0] as UserRole;
-      return constants.roles.routes[primaryRole];
-    }
-    return '/';
-  };
-
-  // Función para obtener el emoji del rol principal
-  const getRoleEmoji = () => {
-    if (roles.length > 0) {
-      const primaryRole = roles[0] as UserRole;
-      return constants.roles.emojis[primaryRole];
-    }
-    return '👤';
-  };
-
-  // Función para obtener el nombre del rol principal
-  const getRoleName = () => {
-    if (roles.length > 0) {
-      const primaryRole = roles[0] as UserRole;
-      return primaryRole.charAt(0).toUpperCase() + primaryRole.slice(1);
-    }
-    return 'Usuario';
-  };
+  if (isLoading) {
+    return (
+      <div className='flex justify-center items-center min-h-screen bg-purple-50'>
+        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600'></div>
+        <span className='ml-3 text-gray-600'>Cargando...</span>
+      </div>
+    );
+  }
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-purple-50 to-blue-50'>
@@ -66,10 +46,12 @@ export default function Home() {
                     Hola, <span className='font-medium'>{user?.name}</span>
                   </span>
                   <button
-                    onClick={() => (window.location.href = getDashboardRoute())}
+                    onClick={() =>
+                      (window.location.href = getDashboardRoute(roles))
+                    }
                     className='bg-purple-600 text-white px-4 py-2 rounded-md text-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 flex items-center'
                   >
-                    <span className='mr-2'>{getRoleEmoji()}</span>
+                    <span className='mr-2'>{getRoleEmoji(roles)}</span>
                     Mi Dashboard
                   </button>
                   <button
@@ -125,11 +107,13 @@ export default function Home() {
                 <span className='font-semibold'>{user?.name}</span>!
               </p>
               <button
-                onClick={() => (window.location.href = getDashboardRoute())}
+                onClick={() =>
+                  (window.location.href = getDashboardRoute(roles))
+                }
                 className='bg-purple-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center'
               >
-                <span className='mr-3 text-2xl'>{getRoleEmoji()}</span>
-                Ir a mi Dashboard de {getRoleName()}
+                <span className='mr-3 text-2xl'>{getRoleEmoji(roles)}</span>
+                Ir a mi Dashboard de {getRoleName(roles)}
               </button>
             </div>
           ) : (
