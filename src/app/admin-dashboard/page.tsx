@@ -14,6 +14,7 @@ import { authAPI } from '@/lib/api';
 
 import ProtectedRoute from '@/components/ProtectedRoute';
 
+import CapabilitiesByRole from '@/app/components/users/CapabilitiesByRole';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface AdminDashboardData {
@@ -245,21 +246,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Capabilities */}
-                <div className='bg-white rounded-lg shadow-sm p-6'>
-                  <h3 className='text-lg font-semibold text-gray-900 mb-4'>
-                    Capacidades del Administrador
-                  </h3>
-                  <div className='space-y-3'>
-                    {dashboardData.capabilities.map((capability, index) => (
-                      <div key={index} className='flex items-start'>
-                        <div className='flex-shrink-0 mt-1'>
-                          <div className='w-2 h-2 bg-purple-500 rounded-full'></div>
-                        </div>
-                        <p className='ml-3 text-gray-700'>{capability}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <CapabilitiesByRole capabilities={dashboardData.capabilities} />
               </div>
 
               {/* Quick Actions */}

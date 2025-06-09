@@ -4,7 +4,6 @@ import {
   ArrowRightOnRectangleIcon,
   CalendarIcon,
   ChartBarIcon,
-  ExclamationTriangleIcon,
   PlayIcon,
   PlusIcon,
   UsersIcon,
@@ -15,6 +14,8 @@ import { authAPI } from '@/lib/api';
 
 import ProtectedRoute from '@/components/ProtectedRoute';
 
+import CapabilitiesByRole from '@/app/components/users/CapabilitiesByRole';
+import LimitationsByRole from '@/app/components/users/LimitationsByRole';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ProducerDashboardData {
@@ -169,45 +170,6 @@ export default function ProducerDashboard() {
                 </div>
               </div>
 
-              {/* Main Content Grid */}
-              <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
-                {/* Capabilities */}
-                <div className='bg-white rounded-lg shadow-sm p-6'>
-                  <h3 className='text-lg font-semibold text-gray-900 mb-4 flex items-center'>
-                    <span className='text-xl mr-2'>✅</span>
-                    Capacidades del Productor
-                  </h3>
-                  <div className='space-y-3'>
-                    {dashboardData.capabilities.map((capability, index) => (
-                      <div key={index} className='flex items-start'>
-                        <div className='flex-shrink-0 mt-1'>
-                          <div className='w-2 h-2 bg-red-500 rounded-full'></div>
-                        </div>
-                        <p className='ml-3 text-gray-700'>{capability}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Limitations */}
-                <div className='bg-yellow-50 rounded-lg border border-yellow-200 p-6'>
-                  <h3 className='text-lg font-semibold text-gray-900 mb-4 flex items-center'>
-                    <ExclamationTriangleIcon className='h-5 w-5 text-yellow-600 mr-2' />
-                    Limitaciones
-                  </h3>
-                  <div className='space-y-3'>
-                    {dashboardData.limitations.map((limitation, index) => (
-                      <div key={index} className='flex items-start'>
-                        <div className='flex-shrink-0 mt-1'>
-                          <div className='w-2 h-2 bg-yellow-500 rounded-full'></div>
-                        </div>
-                        <p className='ml-3 text-yellow-800'>{limitation}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
               {/* Quick Actions */}
               <div className='mt-8 bg-white rounded-lg shadow-sm p-6'>
                 <h3 className='text-lg font-semibold text-gray-900 mb-4'>
@@ -253,7 +215,7 @@ export default function ProducerDashboard() {
               </div>
 
               {/* Recent Activity */}
-              <div className='mt-8 bg-white rounded-lg shadow-sm p-6'>
+              <div className='mt-8 bg-white rounded-lg shadow-sm p-6 mb-8'>
                 <h3 className='text-lg font-semibold text-gray-900 mb-4'>
                   Actividad Reciente
                 </h3>
@@ -300,6 +262,11 @@ export default function ProducerDashboard() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
+                <CapabilitiesByRole capabilities={dashboardData.capabilities} />
+                <LimitationsByRole limitations={dashboardData.limitations} />
               </div>
             </>
           ) : null}
