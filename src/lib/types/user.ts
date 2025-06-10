@@ -104,6 +104,15 @@ export interface SearchUsersResponse {
   total_found: number;
 }
 
+export interface DashboardData {
+  icon: string;
+  title: string;
+  message: string;
+  user: string;
+  capabilities: string[];
+  limitations: string[];
+}
+
 export interface UserFilters {
   role?: string;
   company_id?: number;
