@@ -9,6 +9,7 @@ import {
 import React, { useEffect, useState } from 'react';
 
 import { authAPI } from '@/lib/api';
+import { Play } from '@/lib/types/play';
 import { DashboardData } from '@/lib/types/user';
 
 import RecentActivities from '@/components/producer/RecentActivities';
@@ -28,27 +29,45 @@ export default function ProducerDashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null
   );
+  const [plays, setPlays] = useState<Play[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const data = await authAPI.getProducerDashboard();
-        setDashboardData(data);
-      } catch (error: unknown) {
-        const errorMessage = 'Error al cargar los datos del dashboard';
-        throw new Error(errorMessage);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      const data = await authAPI.getProducerDashboard();
+      setDashboardData(data);
+    } catch (error: unknown) {
+      const errorMessage = 'Error al cargar los datos del dashboard';
+      throw new Error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  const fetchPlays = async () => {
+    try {
+      const data = await authAPI.getPlays();
+      console.log(data);
+      setPlays(data.data);
+    } catch (error: unknown) {
+      const errorMessage = 'Error al cargar las obras';
+      throw new Error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchDashboardData();
+    fetchPlays();
   }, []);
 
   if (isLoading) {
     return <Spinner />;
   }
+
+  console.log(plays);
 
   return (
     <ProtectedRoute allowedRoles={['productor']}>

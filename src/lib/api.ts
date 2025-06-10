@@ -1,5 +1,8 @@
 import axios from 'axios';
 
+import { PlayResponse, PlaysResponse } from '@/lib/types/play';
+import { ChangeRoleData, ChangeRoleResponse, Role } from '@/lib/types/role';
+
 import {
   API_BASE_URL,
   AuthResponse,
@@ -13,7 +16,6 @@ import {
   CreateCompanyData,
   UpdateCompanyData,
 } from './types/company';
-import { ChangeRoleData, ChangeRoleResponse, Role } from './types/role';
 import {
   CreateUserData,
   CreateUserResponse,
@@ -232,6 +234,17 @@ export const authAPI = {
 
   deleteCompany: async (companyId: number): Promise<void> => {
     await api.delete(`/companies/${companyId}`);
+  },
+
+  // Endpoints para gestión de obras
+  getPlays: async (): Promise<PlaysResponse> => {
+    const response = await api.get('/plays');
+    return response.data;
+  },
+
+  getPlay: async (playId: number): Promise<PlayResponse> => {
+    const response = await api.get(`/plays/${playId}`);
+    return response.data;
   },
 };
 
