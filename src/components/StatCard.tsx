@@ -6,7 +6,7 @@ interface StatCardProps {
   icon: React.ReactNode;
   title: string;
   value: number | string;
-  color?: 'red' | 'orange' | 'blue' | 'green';
+  color?: 'red' | 'orange' | 'blue' | 'green' | 'purple';
 }
 
 const colorClasses: Record<Required<StatCardProps>['color'], string> = {
@@ -14,6 +14,7 @@ const colorClasses: Record<Required<StatCardProps>['color'], string> = {
   orange: 'border-t-orange-500 text-orange-600',
   blue: 'border-t-blue-500 text-blue-600',
   green: 'border-t-green-500 text-green-600',
+  purple: 'border-t-purple-500 text-purple-600',
 };
 
 export const StatCard: React.FC<StatCardProps> = ({

@@ -11,16 +11,16 @@ import React, { useEffect, useState } from 'react';
 
 import { authAPI } from '@/lib/api';
 
-import ProtectedRoute from '@/components/ProtectedRoute';
-import DashboardHeader from '@/components/ui/DashboardHeader';
-import QuickActions, { QuickAction } from '@/components/QuickActions';
-import StatCard from '@/components/StatCard';
 import LiveSessionStatus from '@/components/director/LiveSessionStatus';
 import ShowCard from '@/components/director/ShowCard';
-import CapabilitiesByRole from '@/app/components/users/CapabilitiesByRole';
-import LimitationsByRole from '@/app/components/users/LimitationsByRole';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import QuickActions, { QuickAction } from '@/components/QuickActions';
+import StatCard from '@/components/StatCard';
+import DashboardHeader from '@/components/ui/DashboardHeader';
 import { Spinner } from '@/components/ui/Spinner';
 
+import CapabilitiesByRole from '@/app/components/users/CapabilitiesByRole';
+import LimitationsByRole from '@/app/components/users/LimitationsByRole';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface DirectorDashboardData {
@@ -32,6 +32,7 @@ interface DirectorDashboardData {
 
 export default function DirectorDashboard() {
   const { user } = useAuth();
+  console.log(user);
   const [dashboardData, setDashboardData] =
     useState<DirectorDashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
