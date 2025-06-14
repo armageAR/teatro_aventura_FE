@@ -277,21 +277,11 @@ export default function AdminDashboard() {
                     className='p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left'
                   >
                     <div className='flex items-center mb-2'>
-                      <UserGroupIcon className='h-5 w-5 text-purple-600 mr-2' />
+                      <BuildingOfficeIcon className='h-5 w-5 text-purple-600 mr-2' />
                       <span className='font-medium'>Gestionar Compañías</span>
                     </div>
                     <p className='text-sm text-gray-600'>
                       Administrar compañías de teatro del sistema
-                    </p>
-                  </button>
-
-                  <button className='p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left'>
-                    <div className='flex items-center mb-2'>
-                      <CogIcon className='h-5 w-5 text-purple-600 mr-2' />
-                      <span className='font-medium'>Configurar Sistema</span>
-                    </div>
-                    <p className='text-sm text-gray-600'>
-                      Ajustar configuraciones generales
                     </p>
                   </button>
 
