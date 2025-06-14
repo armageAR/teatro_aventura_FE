@@ -35,13 +35,10 @@ export default function PlaysManagement() {
   const loadPlays = useCallback(async () => {
     try {
       setIsLoading(true);
-      console.log('🎭 Loading plays for producer...');
       const response = await authAPI.getPlays();
-      console.log('🎭 Plays response:', response);
 
       // Handle different response formats
       const playsData = response.data || response;
-      console.log('🎭 Processed plays data:', playsData);
       setPlays(Array.isArray(playsData) ? playsData : []);
     } catch (error) {
       console.error('❌ Error loading plays:', error);

@@ -41,7 +41,6 @@ export default function CompaniesAdministration() {
   const loadCompanies = async () => {
     try {
       const response = await authAPI.getCompanies();
-      console.log('Datos de compañías recibidos:', response);
 
       // El backend devuelve { companies: [...] }, extraer el array
       const companiesArray = response.companies || response;
@@ -100,7 +99,6 @@ export default function CompaniesAdministration() {
           editingCompany.id,
           formData
         );
-        console.log('Respuesta de actualización:', response);
 
         // Extraer la compañía de la respuesta (puede venir en { company: {...} } o directamente)
         const updatedCompany = response.company || response;
@@ -113,7 +111,6 @@ export default function CompaniesAdministration() {
         toast.success('Compañía actualizada exitosamente');
       } else {
         const response = await authAPI.createCompany(formData);
-        console.log('Respuesta de creación:', response);
 
         // Extraer la compañía de la respuesta (puede venir en { company: {...} } o directamente)
         const newCompany = response.company || response;
