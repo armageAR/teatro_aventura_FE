@@ -20,8 +20,9 @@ export interface PlayResponse {
 
 export interface CreatePlayData {
   titulo: string;
-  descripcion?: string;
+  descripcion: string;
   fecha_estreno: string;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export interface UpdatePlayData {
