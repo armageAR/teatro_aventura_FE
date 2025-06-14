@@ -1,5 +1,7 @@
+import { CalendarIcon, PlusIcon } from '@heroicons/react/24/outline';
 import React from 'react';
-import { CalendarIcon, PlusIcon, UsersIcon } from '@heroicons/react/24/outline';
+
+import { QuickActionButton } from '@/components/QuickActionButton';
 
 export type QuickActionColor = 'red' | 'orange' | 'blue' | 'green' | 'purple';
 
@@ -8,9 +10,13 @@ export interface QuickAction {
   title: string;
   description: string;
   color: QuickActionColor;
+  onClick: () => void;
 }
 
-const colorStyles: Record<QuickActionColor, { border: string; hover: string; text: string; icon: string }> = {
+const colorStyles: Record<
+  QuickActionColor,
+  { border: string; hover: string; text: string; icon: string }
+> = {
   red: {
     border: 'border-red-200',
     hover: 'hover:bg-red-50',
@@ -50,44 +56,42 @@ export interface QuickActionsProps {
 const defaultActions: QuickAction[] = [
   {
     icon: <PlusIcon className='h-5 w-5' />,
-    title: 'Nueva Obra',
+    title: 'Gestion Obras',
     description: 'Crear una nueva obra teatral interactiva',
     color: 'red',
+    onClick: () => {
+      window.location.href = '/producer-dashboard/plays';
+    },
   },
   {
     icon: <CalendarIcon className='h-5 w-5' />,
-    title: 'Programar Función',
+    title: 'Gestion Funciónes',
     description: 'Crear nuevas fechas y horarios',
     color: 'orange',
-  },
-  {
-    icon: <UsersIcon className='h-5 w-5' />,
-    title: 'Asignar Director',
-    description: 'Gestionar equipo de directores',
-    color: 'blue',
+    onClick: () => {
+      window.location.href = '/producer-dashboard/performances';
+    },
   },
 ];
 
-export const QuickActions: React.FC<QuickActionsProps> = ({ actions = defaultActions }) => {
+export const QuickActionsPanel: React.FC<QuickActionsProps> = ({
+  actions = defaultActions,
+}) => {
   return (
     <div className='mt-8 bg-white rounded-lg shadow-sm p-6'>
-      <h3 className='text-lg font-semibold text-gray-900 mb-4'>Acciones Rápidas</h3>
+      <h3 className='text-lg font-semibold text-gray-900 mb-4'>
+        Acciones Rápidas
+      </h3>
       <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
         {actions.map((action, index) => {
           const styles = colorStyles[action.color];
           return (
-            <button
+            <QuickActionButton
               key={index}
-              className={`p-4 border-2 ${styles.border} rounded-lg ${styles.hover} transition-colors text-left group`}
-            >
-              <div className='flex items-center mb-2'>
-                {React.cloneElement(action.icon, {
-                  className: `h-5 w-5 ${styles.icon} mr-2 group-hover:scale-110 transition-transform`,
-                })}
-                <span className={`font-medium ${styles.text}`}>{action.title}</span>
-              </div>
-              <p className='text-sm text-gray-600'>{action.description}</p>
-            </button>
+              action={action}
+              index={index}
+              styles={styles}
+            />
           );
         })}
       </div>
@@ -95,4 +99,4 @@ export const QuickActions: React.FC<QuickActionsProps> = ({ actions = defaultAct
   );
 };
 
-export default QuickActions;
+export default QuickActionsPanel;
