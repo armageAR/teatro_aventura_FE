@@ -53,7 +53,6 @@ export interface UsersListResponse {
     search?: string;
     company_id?: number;
   };
-  can_view_all_companies: boolean;
 }
 
 export interface UserResponse {
