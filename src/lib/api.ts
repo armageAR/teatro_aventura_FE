@@ -1,6 +1,27 @@
 import axios from 'axios';
 
-import { PlayResponse, PlaysResponse } from '@/lib/types/play';
+import {
+  CreatePerformanceData,
+  CreatePerformanceResponse,
+  DeletePerformanceResponse,
+  JoinPerformanceResponse,
+  PerformanceResponse,
+  PerformanceResultsResponse,
+  PerformancesResponse,
+  SpectatorAnswer,
+  SpectatorAnswerResponse,
+  UpdatePerformanceData,
+  UpdatePerformanceResponse,
+} from '@/lib/types/performance';
+import {
+  CreatePlayData,
+  CreatePlayResponse,
+  DeletePlayResponse,
+  PlayResponse,
+  PlaysResponse,
+  UpdatePlayData,
+  UpdatePlayResponse,
+} from '@/lib/types/play';
 import { ChangeRoleData, ChangeRoleResponse, Role } from '@/lib/types/role';
 
 import {
@@ -238,12 +259,137 @@ export const authAPI = {
 
   // Endpoints para gestión de obras
   getPlays: async (): Promise<PlaysResponse> => {
-    const response = await api.get('/plays');
+    // Si hay token, usar el endpoint protegido que filtra por compañía
+    const token = localStorage.getItem('token');
+    const endpoint = token ? '/plays' : '/plays';
+    const response = await api.get(endpoint);
     return response.data;
   },
 
   getPlay: async (playId: number): Promise<PlayResponse> => {
     const response = await api.get(`/plays/${playId}`);
+    return response.data;
+  },
+
+  // Endpoints para gestión de obras (Productor)
+  createPlay: async (playData: CreatePlayData): Promise<CreatePlayResponse> => {
+    const response = await api.post('/plays', playData);
+    return response.data;
+  },
+
+  updatePlay: async (
+    playId: number,
+    playData: UpdatePlayData
+  ): Promise<UpdatePlayResponse> => {
+    const response = await api.put(`/plays/${playId}`, playData);
+    return response.data;
+  },
+
+  deletePlay: async (playId: number): Promise<DeletePlayResponse> => {
+    const response = await api.delete(`/plays/${playId}`);
+    return response.data;
+  },
+
+  // Endpoints para gestión de funciones
+  getPerformances: async (): Promise<PerformancesResponse> => {
+    const response = await api.get('/performances');
+    return response.data;
+  },
+
+  getPerformance: async (
+    performanceId: number
+  ): Promise<PerformanceResponse> => {
+    const response = await api.get(`/performances/${performanceId}`);
+    return response.data;
+  },
+
+  createPerformance: async (
+    performanceData: CreatePerformanceData
+  ): Promise<CreatePerformanceResponse> => {
+    const response = await api.post('/performances', performanceData);
+    return response.data;
+  },
+
+  updatePerformance: async (
+    performanceId: number,
+    performanceData: UpdatePerformanceData
+  ): Promise<UpdatePerformanceResponse> => {
+    const response = await api.put(
+      `/performances/${performanceId}`,
+      performanceData
+    );
+    return response.data;
+  },
+
+  deletePerformance: async (
+    performanceId: number
+  ): Promise<DeletePerformanceResponse> => {
+    const response = await api.delete(`/performances/${performanceId}`);
+    return response.data;
+  },
+
+  // Endpoints públicos para espectadores
+  joinPerformanceByQR: async (
+    qrCode: string
+  ): Promise<JoinPerformanceResponse> => {
+    const response = await api.post(`/join-performance/${qrCode}`);
+    return response.data;
+  },
+
+  submitAnswer: async (
+    answerData: SpectatorAnswer
+  ): Promise<SpectatorAnswerResponse> => {
+    const response = await api.post('/submit-answer', answerData);
+    return response.data;
+  },
+
+  getPerformanceResults: async (
+    performanceId: number
+  ): Promise<PerformanceResultsResponse> => {
+    const response = await api.get(`/performance/${performanceId}/results`);
+    return response.data;
+  },
+
+  // Endpoints para permisos
+  getPermissions: async () => {
+    const response = await api.get('/roles/permissions');
+    return response.data;
+  },
+
+  checkPermission: async (permission: string) => {
+    const response = await api.post('/roles/check-permission', { permission });
+    return response.data;
+  },
+
+  // Endpoints para gestión de roles
+  assignRole: async (userId: number, role: string) => {
+    const response = await api.post('/roles/assign', { user_id: userId, role });
+    return response.data;
+  },
+
+  removeRole: async (userId: number, role: string) => {
+    const response = await api.post('/roles/remove', { user_id: userId, role });
+    return response.data;
+  },
+
+  // Endpoints de autenticación adicionales
+  forgotPassword: async (email: string) => {
+    const response = await api.post('/forgot-password', { email });
+    return response.data;
+  },
+
+  resetPassword: async (
+    token: string,
+    email: string,
+    password: string,
+    passwordConfirmation: string
+  ) => {
+    const response = await api.post('/reset-password', {
+      token,
+      email,
+      password,
+      password_confirmation: passwordConfirmation,
+    });
     return response.data;
   },
 };
