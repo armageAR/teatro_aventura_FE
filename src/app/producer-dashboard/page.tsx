@@ -12,9 +12,9 @@ import { authAPI } from '@/lib/api';
 import { Play } from '@/lib/types/play';
 import { DashboardData } from '@/lib/types/user';
 
+import QuickActionsPanel from '@/components/producer/QuickActionsPanel';
 import RecentActivities from '@/components/producer/RecentActivities';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import QuickActions from '@/components/QuickActions';
 import StatCard from '@/components/StatCard';
 import { ButtonLogout, ButtonStart } from '@/components/ui/buttons';
 import { Spinner } from '@/components/ui/Spinner';
@@ -135,7 +135,7 @@ export default function ProducerDashboard() {
               </div>
 
               {/* Quick Actions */}
-              <QuickActions />
+              <QuickActionsPanel />
 
               {/* Recent Activity */}
               <RecentActivities />

@@ -8,8 +8,13 @@ import {
 } from '@heroicons/react/24/outline';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
+
+import { authAPI } from '@/lib/api';
+import { Performance } from '@/lib/types/performance';
 
 interface FunctionData {
+  performance: Performance;
   title: string;
   description: string;
   status: 'ready' | 'live' | 'ended';
@@ -17,6 +22,14 @@ interface FunctionData {
   date: string;
   expectedDuration: string;
   currentParticipants: number;
+  questions?: Array<{
+    id: number;
+    question: string;
+    answers: Array<{
+      id: number;
+      answer: string;
+    }>;
+  }>;
 }
 
 export default function QRAccessPage() {
@@ -26,31 +39,60 @@ export default function QRAccessPage() {
   const [functionData, setFunctionData] = useState<FunctionData | null>(null);
 
   useEffect(() => {
-    // Simular carga de datos de la función
     const loadFunctionData = async () => {
       try {
-        // Aquí iría la llamada real a la API para obtener datos de la función
-        setTimeout(() => {
+        setIsLoading(true);
+
+        // Try to join the performance by QR code
+        const response = await authAPI.joinPerformanceByQR(qrCode);
+        const performance = response.performance;
+
+        if (performance) {
+          // Determine status based on date/time
+          const now = new Date();
+          const performanceDate = new Date(
+            `${performance.date} ${performance.time}`
+          );
+          let status: 'ready' | 'live' | 'ended' = 'ready';
+
+          if (now > performanceDate) {
+            // Check if it's within the performance duration (assuming 2 hours)
+            const endTime = new Date(
+              performanceDate.getTime() + 2 * 60 * 60 * 1000
+            );
+            status = now > endTime ? 'ended' : 'live';
+          }
+
           setFunctionData({
-            title: 'Romeo y Julieta 2.0',
+            performance,
+            title: performance.play?.titulo || 'Función Teatral',
             description:
-              'Una reimaginación interactiva del clásico de Shakespeare',
-            status: 'ready', // ready, live, ended
-            startTime: '20:00',
-            date: '15 de Enero, 2025',
+              performance.play?.descripcion ||
+              'Experiencia teatral interactiva',
+            status,
+            startTime: performance.time,
+            date: new Date(performance.date).toLocaleDateString('es-ES', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            }),
             expectedDuration: '2 horas',
-            currentParticipants: 156,
+            currentParticipants: Math.floor(Math.random() * 200) + 50, // Mock data
+            questions: response.questions || [],
           });
-          setIsLoading(false);
-        }, 1500);
+        }
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error('Error loading function data:', error);
+        toast.error('No se pudo acceder a la función. Verifica el código QR.');
+        setFunctionData(null);
+      } finally {
         setIsLoading(false);
       }
     };
 
-    loadFunctionData();
+    if (qrCode) {
+      loadFunctionData();
+    }
   }, [qrCode]);
 
   if (isLoading) {
