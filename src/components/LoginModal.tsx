@@ -178,13 +178,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           </button>
 
           <div className='text-center'>
-            <a
-              href='#'
+            <button
+              type='button'
+              onClick={() => {
+                handleClose();
+                window.location.href = '/forgot-password';
+              }}
               className='text-sm text-blue-600 hover:text-blue-800'
-              onClick={(e) => e.preventDefault()} // Por ahora no implementado
             >
               ¿Olvidaste tu contraseña?
-            </a>
+            </button>
           </div>
         </form>
 
