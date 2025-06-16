@@ -201,7 +201,7 @@ export default function PerformancesManagement() {
 
   // Filter performances based on search term
   const filteredPerformances = performances.filter((performance) => {
-    const playTitle = performance.play?.titulo || '';
+    const playTitle = performance.play?.title || '';
     return (
       playTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
       performance.date.includes(searchTerm) ||
