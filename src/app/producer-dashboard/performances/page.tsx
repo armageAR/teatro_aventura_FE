@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  EyeIcon,
-  PencilIcon,
-  PlusIcon,
-  QrCodeIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline';
+import { PlusIcon } from '@heroicons/react/24/outline';
 import React, { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
@@ -20,8 +14,12 @@ import {
 import { Play, PlaysResponse } from '@/lib/types/play';
 
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { Column, DataTable } from '@/components/ui/DataTable';
-import { FormField, FormModal } from '@/components/ui/FormModal';
+import {
+  PerformanceFormModal,
+} from '@/components/Performances/PerformanceFormModal';
+import {
+  PerformancesTable,
+} from '@/components/Performances/PerformancesTable';
 import { PageHeader } from '@/components/ui/PageHeader';
 
 export default function PerformancesManagement() {
@@ -199,145 +197,6 @@ export default function PerformancesManagement() {
     setFormData({ ...formData, [field]: value });
   };
 
-  // Filter performances based on search term
-  const filteredPerformances = performances.filter((performance) => {
-    const playTitle = performance.play?.title || '';
-    return (
-      playTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      performance.date.includes(searchTerm) ||
-      performance.qr_code.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  });
-
-  const columns: Column<Performance>[] = [
-    {
-      key: 'play_id',
-      header: 'Obra',
-      render: (performance) => {
-        console.log('performance', performance);
-        return (
-          <div className='flex items-center'>
-            <div className='text-2xl mr-3'>🎭</div>
-            <div>
-              <div className='text-sm font-medium text-gray-900'>
-                {performance.play?.title || `Obra ID: ${performance.play_id}`}
-              </div>
-              {performance.play?.description && (
-                <div className='text-xs text-gray-500 max-w-xs truncate'>
-                  {performance.play.description}
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      key: 'date',
-      header: 'Fecha y Hora',
-      render: (performance) => (
-        <div>
-          <div className='text-sm font-medium text-gray-900'>
-            {new Date(performance.date).toLocaleDateString('es-ES')}
-          </div>
-          <div className='text-xs text-gray-500'>{performance.time}</div>
-        </div>
-      ),
-    },
-    {
-      key: 'qr_code',
-      header: 'Código QR',
-      render: (performance) => (
-        <div className='flex items-center'>
-          <span className='text-sm text-gray-900 font-mono'>
-            {performance.qr_code}
-          </span>
-          <button
-            onClick={() => handleViewQR(performance.qr_code)}
-            className='ml-2 text-purple-600 hover:text-purple-800'
-            title='Ver QR'
-          >
-            <QrCodeIcon className='h-4 w-4' />
-          </button>
-        </div>
-      ),
-    },
-    {
-      key: 'is_active',
-      header: 'Estado',
-      render: (performance) => (
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded-full ${
-            performance.is_active
-              ? 'bg-green-100 text-green-800'
-              : 'bg-red-100 text-red-800'
-          }`}
-        >
-          {performance.is_active ? 'Activa' : 'Inactiva'}
-        </span>
-      ),
-    },
-    {
-      key: 'actions',
-      header: 'Acciones',
-      render: (performance) => (
-        <div className='flex space-x-2'>
-          <button
-            onClick={() => handleViewResults(performance.id)}
-            className='text-green-600 hover:text-green-800 p-1 rounded'
-            title='Ver resultados'
-          >
-            <EyeIcon className='h-4 w-4' />
-          </button>
-          <button
-            onClick={() => handleEdit(performance)}
-            className='text-blue-600 hover:text-blue-800 p-1 rounded'
-            title='Editar'
-          >
-            <PencilIcon className='h-4 w-4' />
-          </button>
-          <button
-            onClick={() => handleDelete(performance.id)}
-            className='text-red-600 hover:text-red-800 p-1 rounded'
-            title='Eliminar'
-          >
-            <TrashIcon className='h-4 w-4' />
-          </button>
-        </div>
-      ),
-    },
-  ];
-
-  const formFields: FormField[] = [
-    {
-      name: 'play_id',
-      label: 'Obra',
-      type: 'select',
-      required: true,
-      options: plays.map((play) => ({
-        value: play.id,
-        label: play.title || `Obra ${play.id}`,
-      })),
-    },
-    {
-      name: 'date',
-      label: 'Fecha',
-      type: 'date',
-      required: true,
-    },
-    {
-      name: 'time',
-      label: 'Hora',
-      type: 'time',
-      required: true,
-    },
-    {
-      name: 'location',
-      label: 'Ubicación',
-      type: 'text',
-      required: false,
-    },
-  ];
 
   return (
     <ProtectedRoute allowedRoles={['productor']}>
@@ -356,34 +215,25 @@ export default function PerformancesManagement() {
           ]}
         />
 
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-          <DataTable
-            data={filteredPerformances}
-            columns={columns}
-            loading={isLoading}
-            title='Funciones'
-            count={filteredPerformances.length}
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            emptyState={{
-              icon: '🎪',
-              title: 'No hay funciones programadas',
-              description:
-                'Crea tu primera función usando el botón "Nueva Función"',
-            }}
-          />
-        </div>
+        <PerformancesTable
+          performances={performances}
+          loading={isLoading}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onViewResults={handleViewResults}
+          onViewQR={handleViewQR}
+        />
 
-        <FormModal
+        <PerformanceFormModal
           isOpen={isModalOpen}
           onClose={closeModal}
-          title={isEditing ? 'Editar Función' : 'Programar Nueva Función'}
-          icon='🎪'
-          fields={formFields}
+          isEditing={isEditing}
+          plays={plays}
           formData={formData}
           onChange={handleFormChange}
           onSubmit={handleSubmit}
-          submitText={isEditing ? 'Actualizar Función' : 'Programar Función'}
           isSubmitting={isSubmitting}
         />
       </div>
