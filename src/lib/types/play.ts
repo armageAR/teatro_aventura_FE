@@ -10,7 +10,7 @@ export interface Play {
 }
 
 export interface PlaysResponse {
-  data: Play[];
+  plays: Play[];
 }
 
 export interface PlayResponse {

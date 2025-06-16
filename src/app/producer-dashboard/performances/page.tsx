@@ -39,6 +39,7 @@ export default function PerformancesManagement() {
     play_id: 0,
     date: '',
     time: '',
+    location: '',
   });
 
   const loadData = useCallback(async () => {
@@ -46,15 +47,14 @@ export default function PerformancesManagement() {
       setIsLoading(true);
       const [performancesResponse, playsResponse] = await Promise.all([
         authAPI.getPerformances().catch(() => ({ data: [] })),
-        authAPI.getPlays().catch(() => ({ data: [] })),
+        authAPI.getPlays().catch(() => ({ plays: [] })),
       ]);
 
       // Handle different response formats
       const performancesData =
-        (performancesResponse as PerformancesResponse).data ||
         (performancesResponse as PerformancesResponse).performances ||
-        [];
-      const playsData = (playsResponse as PlaysResponse).data || playsResponse;
+        performancesResponse;
+      const playsData = (playsResponse as PlaysResponse).plays || playsResponse;
 
       setPerformances(Array.isArray(performancesData) ? performancesData : []);
       setPlays(Array.isArray(playsData) ? playsData : []);
@@ -136,6 +136,7 @@ export default function PerformancesManagement() {
       play_id: performance.play_id,
       date: performance.date,
       time: performance.time,
+      location: performance.location || '',
     });
     setIsModalOpen(true);
   };
@@ -174,6 +175,7 @@ export default function PerformancesManagement() {
       play_id: 0,
       date: '',
       time: '',
+      location: '',
     });
     setIsModalOpen(true);
   };
@@ -186,6 +188,7 @@ export default function PerformancesManagement() {
       play_id: 0,
       date: '',
       time: '',
+      location: '',
     });
   };
 
@@ -210,21 +213,24 @@ export default function PerformancesManagement() {
     {
       key: 'play_id',
       header: 'Obra',
-      render: (performance) => (
-        <div className='flex items-center'>
-          <div className='text-2xl mr-3'>🎭</div>
-          <div>
-            <div className='text-sm font-medium text-gray-900'>
-              {performance.play?.titulo || `Obra ID: ${performance.play_id}`}
-            </div>
-            {performance.play?.descripcion && (
-              <div className='text-xs text-gray-500 max-w-xs truncate'>
-                {performance.play.descripcion}
+      render: (performance) => {
+        console.log('performance', performance);
+        return (
+          <div className='flex items-center'>
+            <div className='text-2xl mr-3'>🎭</div>
+            <div>
+              <div className='text-sm font-medium text-gray-900'>
+                {performance.play?.title || `Obra ID: ${performance.play_id}`}
               </div>
-            )}
+              {performance.play?.description && (
+                <div className='text-xs text-gray-500 max-w-xs truncate'>
+                  {performance.play.description}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      ),
+        );
+      },
     },
     {
       key: 'date',
@@ -324,6 +330,12 @@ export default function PerformancesManagement() {
       label: 'Hora',
       type: 'time',
       required: true,
+    },
+    {
+      name: 'location',
+      label: 'Ubicación',
+      type: 'text',
+      required: false,
     },
   ];
 

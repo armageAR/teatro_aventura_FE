@@ -4,24 +4,23 @@ export interface Performance {
   date: string;
   time: string;
   qr_code: string;
+  location: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
   play?: {
     id: number;
-    titulo: string;
-    descripcion: string;
+    title: string;
+    description: string;
   };
 }
 
 export interface PerformancesResponse {
-  data: Performance[];
-  performances?: Performance[];
+  performances: Performance[];
 }
 
 export interface PerformanceResponse {
-  data: Performance;
-  performance?: Performance;
+  performance: Performance;
 }
 
 export interface CreatePerformanceData {
