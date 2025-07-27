@@ -1,6 +1,6 @@
 import React from 'react';
 
-import type { CreatePerformanceData } from '@/lib/types/performance';
+import type { FormPerformanceData } from '@/lib/types/performance';
 import { usePlays } from '@/hooks/usePlays';
 
 import { FormField, FormModal } from '@/components/ui/FormModal';
@@ -8,7 +8,7 @@ import { FormField, FormModal } from '@/components/ui/FormModal';
 export interface PerformanceFormModalProps {
   isOpen: boolean;
   isEditing: boolean;
-  formData: CreatePerformanceData;
+  formData: FormPerformanceData;
   onChange: (field: string, value: string | number | boolean) => void;
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
