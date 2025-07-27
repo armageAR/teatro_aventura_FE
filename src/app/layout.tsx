@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 
 import '@/styles/globals.css';
 
+import { Providers } from '@/app/providers';
 import { siteConfig } from '@/constant/config';
 import { AuthProvider } from '@/contexts/AuthContext';
 
@@ -54,7 +55,7 @@ export default function RootLayout({
     <html>
       <body>
         <AuthProvider>
-          {children}
+          <Providers>{children}</Providers>
           <Toaster
             position='top-right'
             toastOptions={{
