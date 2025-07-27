@@ -7,11 +7,7 @@ import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import { authAPI } from '@/lib/api';
-import {
-  CreatePerformanceData,
-  Performance,
-  UpdatePerformanceData,
-} from '@/lib/types/performance';
+import { FormPerformanceData, Performance } from '@/lib/types/performance';
 
 import { PerformanceFormModal } from '@/components/Performances/PerformanceFormModal';
 import { PerformancesTable } from '@/components/Performances/PerformancesTable';
@@ -28,7 +24,7 @@ export default function PerformancesManagement() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const [formData, setFormData] = useState<CreatePerformanceData>({
+  const [formData, setFormData] = useState<FormPerformanceData>({
     play_id: 0,
     date: '',
     time: '',
@@ -58,17 +54,18 @@ export default function PerformancesManagement() {
     setIsSubmitting(true);
     try {
       if (isEditing && editingPerformance) {
-        const updateData: UpdatePerformanceData = {
+        const updateData: FormPerformanceData = {
           play_id: formData.play_id,
           date: combinedDateTime,
           time: formData.time,
+          location: formData.location,
           is_active: editingPerformance.is_active,
         };
 
         await authAPI.updatePerformance(editingPerformance.id, updateData);
         toast.success('Función actualizada exitosamente');
       } else {
-        const createData: CreatePerformanceData = {
+        const createData: FormPerformanceData = {
           play_id: formData.play_id,
           date: combinedDateTime,
           time: formData.time,

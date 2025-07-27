@@ -33,14 +33,16 @@ export function PerformancesTable({
 
   const performances = performancesData?.performances ?? [];
 
-  const filteredPerformances = performances.filter((performance) => {
-    const playTitle = performance.play?.title || '';
-    return (
-      playTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      performance.date.includes(searchTerm) ||
-      performance.qr_code.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  });
+  const filteredPerformances = performances.filter(
+    (performance: Performance) => {
+      const playTitle = performance.play?.title || '';
+      return (
+        playTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        performance.date.includes(searchTerm) ||
+        performance.qr_code.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    },
+  );
 
   const columns: Column<Performance>[] = [
     {
@@ -74,6 +76,12 @@ export function PerformancesTable({
         </div>
       ),
     },
+    {
+      key: 'creator',
+      header: 'Creador',
+      render: (performance) => performance?.creator?.name || 'N/A',
+    },
+
     {
       key: 'qr_code',
       header: 'Código QR',

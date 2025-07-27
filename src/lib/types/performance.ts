@@ -13,6 +13,10 @@ export interface Performance {
     title: string;
     description: string;
   };
+  creator?: {
+    id: number;
+    name: string;
+  };
 }
 
 export interface PerformancesResponse {
@@ -23,18 +27,13 @@ export interface PerformanceResponse {
   performance: Performance;
 }
 
-export interface CreatePerformanceData {
-  play_id: number;
-  date: string;
-  time: string;
-  [key: string]: string | number | boolean | undefined;
-}
-
-export interface UpdatePerformanceData {
+export interface FormPerformanceData {
   play_id?: number;
   date?: string;
   time?: string;
+  location?: string;
   is_active?: boolean;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export interface CreatePerformanceResponse {

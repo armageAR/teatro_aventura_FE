@@ -1,16 +1,15 @@
 import axios from 'axios';
 
 import {
-  CreatePerformanceData,
   CreatePerformanceResponse,
   DeletePerformanceResponse,
+  FormPerformanceData,
   JoinPerformanceResponse,
   PerformanceResponse,
   PerformanceResultsResponse,
   PerformancesResponse,
   SpectatorAnswer,
   SpectatorAnswerResponse,
-  UpdatePerformanceData,
   UpdatePerformanceResponse,
 } from '@/lib/types/performance';
 import {
@@ -80,7 +79,7 @@ api.interceptors.response.use(
       window.location.href = '/';
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export const authAPI = {
@@ -152,7 +151,7 @@ export const authAPI = {
 
     const queryString = params.toString();
     const response = await api.get(
-      `/users${queryString ? `?${queryString}` : ''}`
+      `/users${queryString ? `?${queryString}` : ''}`,
     );
     return response.data;
   },
@@ -169,7 +168,7 @@ export const authAPI = {
 
   updateUser: async (
     userId: number,
-    userData: UpdateUserData
+    userData: UpdateUserData,
   ): Promise<UpdateUserResponse> => {
     const response = await api.put(`/users/${userId}`, userData);
     return response.data;
@@ -183,7 +182,7 @@ export const authAPI = {
   // Nuevos endpoints específicos
   changeUserRole: async (
     userId: number,
-    roleData: ChangeRoleData
+    roleData: ChangeRoleData,
   ): Promise<ChangeRoleResponse> => {
     const response = await api.post(`/users/${userId}/change-role`, roleData);
     return response.data;
@@ -191,11 +190,11 @@ export const authAPI = {
 
   resetUserPassword: async (
     userId: number,
-    passwordData: ResetPasswordData
+    passwordData: ResetPasswordData,
   ): Promise<ResetPasswordResponse> => {
     const response = await api.post(
       `/users/${userId}/reset-password`,
-      passwordData
+      passwordData,
     );
     return response.data;
   },
@@ -207,10 +206,10 @@ export const authAPI = {
 
   searchUsers: async (
     query: string,
-    limit = 10
+    limit = 10,
   ): Promise<SearchUsersResponse> => {
     const response = await api.get(
-      `/users/search?q=${encodeURIComponent(query)}&limit=${limit}`
+      `/users/search?q=${encodeURIComponent(query)}&limit=${limit}`,
     );
     return response.data;
   },
@@ -239,7 +238,7 @@ export const authAPI = {
   },
 
   createCompany: async (
-    companyData: CreateCompanyData
+    companyData: CreateCompanyData,
   ): Promise<CompanyResponse> => {
     const response = await api.post('/companies', companyData);
     return response.data;
@@ -247,7 +246,7 @@ export const authAPI = {
 
   updateCompany: async (
     companyId: number,
-    companyData: UpdateCompanyData
+    companyData: UpdateCompanyData,
   ): Promise<CompanyResponse> => {
     const response = await api.put(`/companies/${companyId}`, companyData);
     return response.data;
@@ -279,7 +278,7 @@ export const authAPI = {
 
   updatePlay: async (
     playId: number,
-    playData: UpdatePlayData
+    playData: UpdatePlayData,
   ): Promise<UpdatePlayResponse> => {
     const response = await api.put(`/plays/${playId}`, playData);
     return response.data;
@@ -297,14 +296,14 @@ export const authAPI = {
   },
 
   getPerformance: async (
-    performanceId: number
+    performanceId: number,
   ): Promise<PerformanceResponse> => {
     const response = await api.get(`/performances/${performanceId}`);
     return response.data;
   },
 
   createPerformance: async (
-    performanceData: CreatePerformanceData
+    performanceData: FormPerformanceData,
   ): Promise<CreatePerformanceResponse> => {
     const response = await api.post('/performances', performanceData);
     return response.data;
@@ -312,17 +311,17 @@ export const authAPI = {
 
   updatePerformance: async (
     performanceId: number,
-    performanceData: UpdatePerformanceData
+    performanceData: FormPerformanceData,
   ): Promise<UpdatePerformanceResponse> => {
     const response = await api.put(
       `/performances/${performanceId}`,
-      performanceData
+      performanceData,
     );
     return response.data;
   },
 
   deletePerformance: async (
-    performanceId: number
+    performanceId: number,
   ): Promise<DeletePerformanceResponse> => {
     const response = await api.delete(`/performances/${performanceId}`);
     return response.data;
@@ -330,21 +329,21 @@ export const authAPI = {
 
   // Endpoints públicos para espectadores
   joinPerformanceByQR: async (
-    qrCode: string
+    qrCode: string,
   ): Promise<JoinPerformanceResponse> => {
     const response = await api.post(`/join-performance/${qrCode}`);
     return response.data;
   },
 
   submitAnswer: async (
-    answerData: SpectatorAnswer
+    answerData: SpectatorAnswer,
   ): Promise<SpectatorAnswerResponse> => {
     const response = await api.post('/submit-answer', answerData);
     return response.data;
   },
 
   getPerformanceResults: async (
-    performanceId: number
+    performanceId: number,
   ): Promise<PerformanceResultsResponse> => {
     const response = await api.get(`/performance/${performanceId}/results`);
     return response.data;
@@ -382,7 +381,7 @@ export const authAPI = {
     token: string,
     email: string,
     password: string,
-    passwordConfirmation: string
+    passwordConfirmation: string,
   ) => {
     const response = await api.post('/reset-password', {
       token,
