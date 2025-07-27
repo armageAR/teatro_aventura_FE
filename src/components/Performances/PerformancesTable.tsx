@@ -1,14 +1,16 @@
 import {
   EyeIcon,
+  LinkIcon,
   PencilIcon,
   QrCodeIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
-import React from 'react';
+import React, { useState } from 'react';
 
 import type { Performance } from '@/lib/types/performance';
 import { usePerformances } from '@/hooks/usePerformances';
 
+import { PerformanceQrModal } from '@/components/Performances/PerformanceQrModal';
 import { Column, DataTable } from '@/components/ui/DataTable';
 
 export interface PerformancesTableProps {
@@ -17,7 +19,6 @@ export interface PerformancesTableProps {
   onEdit: (performance: Performance) => void;
   onDelete: (id: number) => void;
   onViewResults: (id: number) => void;
-  onViewQR: (qrCode: string) => void;
 }
 
 export function PerformancesTable({
@@ -26,8 +27,10 @@ export function PerformancesTable({
   onEdit,
   onDelete,
   onViewResults,
-  onViewQR,
 }: PerformancesTableProps) {
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
+  const [selectedQRToken, setSelectedQRToken] = useState<string | null>(null);
+
   const { data: performancesData, isLoading: isPerformancesLoading } =
     usePerformances();
 
@@ -39,10 +42,22 @@ export function PerformancesTable({
       return (
         playTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
         performance.date.includes(searchTerm) ||
-        performance.qr_code.toLowerCase().includes(searchTerm.toLowerCase())
+        performance.qr_code_token
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
       );
     },
   );
+
+  const handleOpenByQR = (qrCode: string) => {
+    const qrUrl = `${window.location.origin}/qr/${qrCode}`;
+    window.open(qrUrl, '_blank');
+  };
+
+  const handleViewQR = (qrToken: string) => {
+    setSelectedQRToken(qrToken);
+    setIsQRModalOpen(true);
+  };
 
   const columns: Column<Performance>[] = [
     {
@@ -81,25 +96,6 @@ export function PerformancesTable({
       header: 'Creador',
       render: (performance) => performance?.creator?.name || 'N/A',
     },
-
-    {
-      key: 'qr_code',
-      header: 'Código QR',
-      render: (performance) => (
-        <div className='flex items-center'>
-          <span className='text-sm text-gray-900 font-mono'>
-            {performance.qr_code}
-          </span>
-          <button
-            onClick={() => onViewQR(performance.qr_code)}
-            className='ml-2 text-purple-600 hover:text-purple-800'
-            title='Ver QR'
-          >
-            <QrCodeIcon className='h-4 w-4' />
-          </button>
-        </div>
-      ),
-    },
     {
       key: 'is_active',
       header: 'Estado',
@@ -120,6 +116,20 @@ export function PerformancesTable({
       header: 'Acciones',
       render: (performance) => (
         <div className='flex space-x-2'>
+          <button
+            onClick={() => handleViewQR(performance.qr_code_token)}
+            className='ml-2 text-purple-600 hover:text-purple-800'
+            title='Ver QR'
+          >
+            <QrCodeIcon className='h-4 w-4' />
+          </button>
+          <button
+            onClick={() => handleOpenByQR(performance.qr_code_token)}
+            className='ml-2 text-green-600 hover:text-green-800'
+            title='Ver Función'
+          >
+            <LinkIcon className='h-4 w-4' />
+          </button>
           <button
             onClick={() => onViewResults(performance.id)}
             className='text-green-600 hover:text-green-800 p-1 rounded'
@@ -162,6 +172,11 @@ export function PerformancesTable({
           description:
             'Crea tu primera función usando el botón "Nueva Función"',
         }}
+      />
+      <PerformanceQrModal
+        isOpen={isQRModalOpen}
+        onClose={() => setIsQRModalOpen(false)}
+        qrCode={selectedQRToken}
       />
     </div>
   );

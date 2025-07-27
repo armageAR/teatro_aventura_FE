@@ -51,23 +51,23 @@ export default function QRAccessPage() {
           // Determine status based on date/time
           const now = new Date();
           const performanceDate = new Date(
-            `${performance.date} ${performance.time}`
+            `${performance.date} ${performance.time}`,
           );
           let status: 'ready' | 'live' | 'ended' = 'ready';
 
           if (now > performanceDate) {
             // Check if it's within the performance duration (assuming 2 hours)
             const endTime = new Date(
-              performanceDate.getTime() + 2 * 60 * 60 * 1000
+              performanceDate.getTime() + 2 * 60 * 60 * 1000,
             );
             status = now > endTime ? 'ended' : 'live';
           }
 
           setFunctionData({
             performance,
-            title: performance.play?.titulo || 'Función Teatral',
+            title: performance.play?.title || 'Función Teatral',
             description:
-              performance.play?.descripcion ||
+              performance.play?.description ||
               'Experiencia teatral interactiva',
             status,
             startTime: performance.time,
@@ -196,8 +196,8 @@ export default function QRAccessPage() {
                   functionData.status === 'live'
                     ? 'bg-green-600 hover:bg-green-700 animate-pulse'
                     : functionData.status === 'ready'
-                    ? 'bg-blue-600 hover:bg-blue-700'
-                    : 'bg-gray-400 cursor-not-allowed'
+                      ? 'bg-blue-600 hover:bg-blue-700'
+                      : 'bg-gray-400 cursor-not-allowed'
                 }`}
                 disabled={functionData.status === 'ended'}
               >
@@ -205,8 +205,8 @@ export default function QRAccessPage() {
                 {functionData.status === 'live'
                   ? 'Participar Ahora'
                   : functionData.status === 'ready'
-                  ? 'Esperando Inicio'
-                  : 'Función Finalizada'}
+                    ? 'Esperando Inicio'
+                    : 'Función Finalizada'}
               </button>
             </div>
 
@@ -273,15 +273,15 @@ export default function QRAccessPage() {
                         functionData.status === 'live'
                           ? 'bg-green-100 text-green-800'
                           : functionData.status === 'ready'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-gray-100 text-gray-800'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-gray-100 text-gray-800'
                       }`}
                     >
                       {functionData.status === 'live'
                         ? 'En vivo'
                         : functionData.status === 'ready'
-                        ? 'Listo'
-                        : 'Finalizado'}
+                          ? 'Listo'
+                          : 'Finalizado'}
                     </span>
                   </p>
                 </div>

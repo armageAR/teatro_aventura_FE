@@ -3,7 +3,7 @@ export interface Performance {
   play_id: number;
   date: string;
   time: string;
-  qr_code: string;
+  qr_code_token: string;
   location: string;
   is_active: boolean;
   created_at: string;

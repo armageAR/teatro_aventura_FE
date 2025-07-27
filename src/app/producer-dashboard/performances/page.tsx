@@ -118,11 +118,6 @@ export default function PerformancesManagement() {
     router.push(`/performance/${performanceId}/results`);
   };
 
-  const handleViewQR = (qrCode: string) => {
-    const qrUrl = `${window.location.origin}/qr/${qrCode}`;
-    window.open(qrUrl, '_blank');
-  };
-
   const resetForm = () => {
     setIsEditing(false);
     setEditingPerformance(null);
@@ -174,7 +169,6 @@ export default function PerformancesManagement() {
           onEdit={handleEdit}
           onDelete={handleDelete}
           onViewResults={handleViewResults}
-          onViewQR={handleViewQR}
         />
 
         <PerformanceFormModal
