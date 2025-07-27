@@ -19,16 +19,16 @@ export interface PlayResponse {
 }
 
 export interface CreatePlayData {
-  titulo: string;
-  descripcion: string;
-  fecha_estreno: string;
+  title: string;
+  description: string;
+  release_date: string;
   [key: string]: string | number | boolean | undefined;
 }
 
 export interface UpdatePlayData {
-  titulo?: string;
-  descripcion?: string;
-  fecha_estreno?: string;
+  title?: string;
+  description?: string;
+  release_date?: string;
 }
 
 export interface CreatePlayResponse {
