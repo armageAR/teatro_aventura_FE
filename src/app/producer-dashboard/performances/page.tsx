@@ -1,31 +1,26 @@
 'use client';
 
 import { PlusIcon } from '@heroicons/react/24/outline';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import { authAPI } from '@/lib/api';
 import {
   CreatePerformanceData,
   Performance,
-  PerformancesResponse,
   UpdatePerformanceData,
 } from '@/lib/types/performance';
-import { Play, PlaysResponse } from '@/lib/types/play';
 
+import { PerformanceFormModal } from '@/components/Performances/PerformanceFormModal';
+import { PerformancesTable } from '@/components/Performances/PerformancesTable';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import {
-  PerformanceFormModal,
-} from '@/components/Performances/PerformanceFormModal';
-import {
-  PerformancesTable,
-} from '@/components/Performances/PerformancesTable';
 import { PageHeader } from '@/components/ui/PageHeader';
 
 export default function PerformancesManagement() {
-  const [performances, setPerformances] = useState<Performance[]>([]);
-  const [plays, setPlays] = useState<Play[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingPerformance, setEditingPerformance] =
@@ -39,36 +34,6 @@ export default function PerformancesManagement() {
     time: '',
     location: '',
   });
-
-  const loadData = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const [performancesResponse, playsResponse] = await Promise.all([
-        authAPI.getPerformances().catch(() => ({ data: [] })),
-        authAPI.getPlays().catch(() => ({ plays: [] })),
-      ]);
-
-      // Handle different response formats
-      const performancesData =
-        (performancesResponse as PerformancesResponse).performances ||
-        performancesResponse;
-      const playsData = (playsResponse as PlaysResponse).plays || playsResponse;
-
-      setPerformances(Array.isArray(performancesData) ? performancesData : []);
-      setPlays(Array.isArray(playsData) ? playsData : []);
-    } catch (error) {
-      console.error('Error loading data:', error);
-      toast.error('Error al cargar los datos');
-      setPerformances([]);
-      setPlays([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,36 +53,33 @@ export default function PerformancesManagement() {
       return;
     }
 
+    const combinedDateTime = `${formData.date}T${formData.time}`;
+
     setIsSubmitting(true);
     try {
       if (isEditing && editingPerformance) {
         const updateData: UpdatePerformanceData = {
           play_id: formData.play_id,
-          date: formData.date,
+          date: combinedDateTime,
           time: formData.time,
+          is_active: editingPerformance.is_active,
         };
 
-        const response = await authAPI.updatePerformance(
-          editingPerformance.id,
-          updateData
-        );
-        const updatedPerformance = response.performance || response;
-
-        setPerformances(
-          performances.map((performance) =>
-            performance.id === editingPerformance.id
-              ? updatedPerformance
-              : performance
-          )
-        );
+        await authAPI.updatePerformance(editingPerformance.id, updateData);
         toast.success('Función actualizada exitosamente');
       } else {
-        const response = await authAPI.createPerformance(formData);
-        const newPerformance = response.performance || response;
+        const createData: CreatePerformanceData = {
+          play_id: formData.play_id,
+          date: combinedDateTime,
+          time: formData.time,
+          location: formData.location,
+        };
 
-        setPerformances([...performances, newPerformance]);
+        await authAPI.createPerformance(createData);
         toast.success('Función creada exitosamente');
       }
+
+      queryClient.invalidateQueries({ queryKey: ['performances'] });
       closeModal();
     } catch (error) {
       console.error('Error saving performance:', error);
@@ -128,12 +90,13 @@ export default function PerformancesManagement() {
   };
 
   const handleEdit = (performance: Performance) => {
+    const [datePart, timePart] = performance.date.split('T');
     setIsEditing(true);
     setEditingPerformance(performance);
     setFormData({
       play_id: performance.play_id,
-      date: performance.date,
-      time: performance.time,
+      date: datePart,
+      time: timePart?.slice(0, 5) || '',
       location: performance.location || '',
     });
     setIsModalOpen(true);
@@ -146,10 +109,8 @@ export default function PerformancesManagement() {
 
     try {
       await authAPI.deletePerformance(performanceId);
-      setPerformances(
-        performances.filter((performance) => performance.id !== performanceId)
-      );
       toast.success('Función eliminada exitosamente');
+      queryClient.invalidateQueries({ queryKey: ['performances'] });
     } catch (error) {
       console.error('Error deleting performance:', error);
       toast.error('Error al eliminar la función');
@@ -157,16 +118,15 @@ export default function PerformancesManagement() {
   };
 
   const handleViewResults = (performanceId: number) => {
-    window.location.href = `/performance/${performanceId}/results`;
+    router.push(`/performance/${performanceId}/results`);
   };
 
   const handleViewQR = (qrCode: string) => {
-    // Create a simple QR code display modal or redirect
     const qrUrl = `${window.location.origin}/qr/${qrCode}`;
     window.open(qrUrl, '_blank');
   };
 
-  const openCreateModal = () => {
+  const resetForm = () => {
     setIsEditing(false);
     setEditingPerformance(null);
     setFormData({
@@ -175,28 +135,24 @@ export default function PerformancesManagement() {
       time: '',
       location: '',
     });
+  };
+
+  const openCreateModal = () => {
     setIsModalOpen(true);
+    resetForm();
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setIsEditing(false);
-    setEditingPerformance(null);
-    setFormData({
-      play_id: 0,
-      date: '',
-      time: '',
-      location: '',
-    });
+    resetForm();
   };
 
   const handleFormChange = (
     field: string,
-    value: string | number | boolean
+    value: string | number | boolean,
   ) => {
     setFormData({ ...formData, [field]: value });
   };
-
 
   return (
     <ProtectedRoute allowedRoles={['productor']}>
@@ -216,8 +172,6 @@ export default function PerformancesManagement() {
         />
 
         <PerformancesTable
-          performances={performances}
-          loading={isLoading}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           onEdit={handleEdit}
@@ -230,7 +184,6 @@ export default function PerformancesManagement() {
           isOpen={isModalOpen}
           onClose={closeModal}
           isEditing={isEditing}
-          plays={plays}
           formData={formData}
           onChange={handleFormChange}
           onSubmit={handleSubmit}

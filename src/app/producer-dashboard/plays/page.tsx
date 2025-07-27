@@ -27,9 +27,9 @@ export default function PlaysManagement() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const [formData, setFormData] = useState<CreatePlayData>({
-    titulo: '',
-    descripcion: '',
-    fecha_estreno: '',
+    title: '',
+    description: '',
+    release_date: '',
   });
 
   const loadPlays = useCallback(async () => {
@@ -37,8 +37,7 @@ export default function PlaysManagement() {
       setIsLoading(true);
       const response = await authAPI.getPlays();
 
-      // Handle different response formats
-      const playsData = response.data || response;
+      const playsData = response.plays;
       setPlays(Array.isArray(playsData) ? playsData : []);
     } catch (error) {
       console.error('❌ Error loading plays:', error);
@@ -56,12 +55,12 @@ export default function PlaysManagement() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.titulo.trim()) {
+    if (!formData.title.trim()) {
       toast.error('El título es requerido');
       return;
     }
 
-    if (!formData.fecha_estreno) {
+    if (!formData.release_date) {
       toast.error('La fecha de estreno es requerida');
       return;
     }
@@ -70,16 +69,18 @@ export default function PlaysManagement() {
     try {
       if (isEditing && editingPlay) {
         const updateData: UpdatePlayData = {
-          titulo: formData.titulo,
-          descripcion: formData.descripcion,
-          fecha_estreno: formData.fecha_estreno,
+          title: formData.title,
+          description: formData.description,
+          release_date: formData.release_date,
         };
 
         const response = await authAPI.updatePlay(editingPlay.id, updateData);
         const updatedPlay = response.play || response;
 
         setPlays(
-          plays.map((play) => (play.id === editingPlay.id ? updatedPlay : play))
+          plays.map((play) =>
+            play.id === editingPlay.id ? updatedPlay : play,
+          ),
         );
         toast.success('Obra actualizada exitosamente');
       } else {
@@ -102,9 +103,9 @@ export default function PlaysManagement() {
     setIsEditing(true);
     setEditingPlay(play);
     setFormData({
-      titulo: play.title || '',
-      descripcion: play.description || '',
-      fecha_estreno: play.release_date || '',
+      title: play.title || '',
+      description: play.description || '',
+      release_date: play.release_date || '',
     });
     setIsModalOpen(true);
   };
@@ -128,9 +129,9 @@ export default function PlaysManagement() {
     setIsEditing(false);
     setEditingPlay(null);
     setFormData({
-      titulo: '',
-      descripcion: '',
-      fecha_estreno: '',
+      title: '',
+      description: '',
+      release_date: '',
     });
     setIsModalOpen(true);
   };
@@ -140,15 +141,16 @@ export default function PlaysManagement() {
     setIsEditing(false);
     setEditingPlay(null);
     setFormData({
-      titulo: '',
-      descripcion: '',
-      fecha_estreno: '',
+      title: '',
+      description: '',
+      release_date: '',
     });
+    loadPlays();
   };
 
   const handleFormChange = (
     field: string,
-    value: string | number | boolean
+    value: string | number | boolean,
   ) => {
     setFormData({ ...formData, [field]: value });
   };
@@ -232,20 +234,20 @@ export default function PlaysManagement() {
 
   const formFields: FormField[] = [
     {
-      name: 'titulo',
+      name: 'title',
       label: 'Título',
       type: 'text',
       required: true,
       placeholder: 'Ingresa el título de la obra',
     },
     {
-      name: 'fecha_estreno',
+      name: 'release_date',
       label: 'Fecha de Estreno',
       type: 'date',
       required: true,
     },
     {
-      name: 'descripcion',
+      name: 'description',
       label: 'Descripción',
       type: 'textarea',
       placeholder: 'Descripción opcional de la obra',

@@ -1,12 +1,17 @@
-import { EyeIcon, PencilIcon, QrCodeIcon, TrashIcon } from '@heroicons/react/24/outline';
+import {
+  EyeIcon,
+  PencilIcon,
+  QrCodeIcon,
+  TrashIcon,
+} from '@heroicons/react/24/outline';
 import React from 'react';
 
 import type { Performance } from '@/lib/types/performance';
+import { usePerformances } from '@/hooks/usePerformances';
+
 import { Column, DataTable } from '@/components/ui/DataTable';
 
 export interface PerformancesTableProps {
-  performances: Performance[];
-  loading: boolean;
   searchTerm: string;
   onSearchChange: (value: string) => void;
   onEdit: (performance: Performance) => void;
@@ -16,8 +21,6 @@ export interface PerformancesTableProps {
 }
 
 export function PerformancesTable({
-  performances,
-  loading,
   searchTerm,
   onSearchChange,
   onEdit,
@@ -25,6 +28,11 @@ export function PerformancesTable({
   onViewResults,
   onViewQR,
 }: PerformancesTableProps) {
+  const { data: performancesData, isLoading: isPerformancesLoading } =
+    usePerformances();
+
+  const performances = performancesData?.performances ?? [];
+
   const filteredPerformances = performances.filter((performance) => {
     const playTitle = performance.play?.title || '';
     return (
@@ -71,7 +79,9 @@ export function PerformancesTable({
       header: 'Código QR',
       render: (performance) => (
         <div className='flex items-center'>
-          <span className='text-sm text-gray-900 font-mono'>{performance.qr_code}</span>
+          <span className='text-sm text-gray-900 font-mono'>
+            {performance.qr_code}
+          </span>
           <button
             onClick={() => onViewQR(performance.qr_code)}
             className='ml-2 text-purple-600 hover:text-purple-800'
@@ -88,7 +98,9 @@ export function PerformancesTable({
       render: (performance) => (
         <span
           className={`px-2 py-1 text-xs font-medium rounded-full ${
-            performance.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            performance.is_active
+              ? 'bg-green-100 text-green-800'
+              : 'bg-red-100 text-red-800'
           }`}
         >
           {performance.is_active ? 'Activa' : 'Inactiva'}
@@ -131,7 +143,7 @@ export function PerformancesTable({
       <DataTable
         data={filteredPerformances}
         columns={columns}
-        loading={loading}
+        loading={isPerformancesLoading}
         title='Funciones'
         count={filteredPerformances.length}
         searchTerm={searchTerm}
@@ -139,7 +151,8 @@ export function PerformancesTable({
         emptyState={{
           icon: '🎪',
           title: 'No hay funciones programadas',
-          description: 'Crea tu primera función usando el botón "Nueva Función"',
+          description:
+            'Crea tu primera función usando el botón "Nueva Función"',
         }}
       />
     </div>

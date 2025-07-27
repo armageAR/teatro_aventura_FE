@@ -1,13 +1,13 @@
 import React from 'react';
 
 import type { CreatePerformanceData } from '@/lib/types/performance';
-import type { Play } from '@/lib/types/play';
+import { usePlays } from '@/hooks/usePlays';
+
 import { FormField, FormModal } from '@/components/ui/FormModal';
 
 export interface PerformanceFormModalProps {
   isOpen: boolean;
   isEditing: boolean;
-  plays: Play[];
   formData: CreatePerformanceData;
   onChange: (field: string, value: string | number | boolean) => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -18,13 +18,15 @@ export interface PerformanceFormModalProps {
 export function PerformanceFormModal({
   isOpen,
   isEditing,
-  plays,
   formData,
   onChange,
   onSubmit,
   onClose,
   isSubmitting,
 }: PerformanceFormModalProps) {
+  const { data: playsData } = usePlays();
+  const plays = playsData?.plays ?? [];
+
   const formFields: FormField[] = [
     {
       name: 'play_id',
