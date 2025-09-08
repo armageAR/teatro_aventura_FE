@@ -35,8 +35,10 @@ const IconLink = React.forwardRef<HTMLAnchorElement, IconLinkProps>(
       classNames,
       ...rest
     },
-    ref
+    ref,
   ) => {
+    // Normalize icon type for React 18 JSX
+    const IconEl = Icon as unknown as React.ElementType | undefined;
     return (
       <UnstyledLink
         ref={ref}
@@ -84,14 +86,14 @@ const IconLink = React.forwardRef<HTMLAnchorElement, IconLinkProps>(
           ],
           //#endregion  //*======== Variants ===========
           'disabled:cursor-not-allowed',
-          className
+          className,
         )}
         {...rest}
       >
-        {Icon && <Icon size='1em' className={cn(classNames?.icon)} />}
+        {IconEl && <IconEl size='1em' className={cn(classNames?.icon)} />}
       </UnstyledLink>
     );
-  }
+  },
 );
 
 export default IconLink;

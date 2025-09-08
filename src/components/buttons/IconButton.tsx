@@ -35,8 +35,11 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
       classNames,
       ...rest
     },
-    ref
+    ref,
   ) => {
+    // react-icons type workaround for React 18 JSX types
+    const SpinnerIcon = ImSpinner2 as unknown as React.ElementType;
+    const IconEl = Icon as unknown as React.ElementType | undefined;
     const disabled = isLoading || buttonDisabled;
 
     return (
@@ -89,7 +92,7 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
           'disabled:cursor-not-allowed',
           isLoading &&
             'relative text-transparent transition-none hover:text-transparent disabled:cursor-wait',
-          className
+          className,
         )}
         {...rest}
       >
@@ -101,16 +104,16 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
                 'text-white': ['primary', 'dark'].includes(variant),
                 'text-black': ['light'].includes(variant),
                 'text-primary-500': ['outline', 'ghost'].includes(variant),
-              }
+              },
             )}
           >
-            <ImSpinner2 className='animate-spin' />
+            <SpinnerIcon className='animate-spin' />
           </div>
         )}
-        {Icon && <Icon size='1em' className={cn(classNames?.icon)} />}
+        {IconEl && <IconEl size='1em' className={cn(classNames?.icon)} />}
       </button>
     );
-  }
+  },
 );
 
 export default IconButton;

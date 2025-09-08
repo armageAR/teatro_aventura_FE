@@ -6,14 +6,14 @@ import {
   LockClosedIcon,
 } from '@heroicons/react/24/outline';
 import { useRouter, useSearchParams } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import { authAPI } from '@/lib/api';
 
 import { handleApiError } from '@/utils/handleApiError';
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const [formData, setFormData] = useState({
     password: '',
     password_confirmation: '',
@@ -75,7 +75,7 @@ export default function ResetPasswordPage() {
         token,
         email,
         formData.password,
-        formData.password_confirmation
+        formData.password_confirmation,
       );
 
       toast.success(response.message || 'Contraseña restablecida exitosamente');
@@ -256,5 +256,19 @@ export default function ResetPasswordPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className='min-h-screen bg-purple-50 flex items-center justify-center'>
+          <div className='text-gray-600'>Cargando formulario…</div>
+        </div>
+      }
+    >
+      <ResetPasswordContent />
+    </Suspense>
   );
 }

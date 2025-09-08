@@ -27,7 +27,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function ProducerDashboard() {
   const { user } = useAuth();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
-    null
+    null,
   );
   const [plays, setPlays] = useState<Play[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,7 +49,7 @@ export default function ProducerDashboard() {
     try {
       const data = await authAPI.getPlays();
       console.log(data);
-      setPlays(data.data);
+      setPlays(data.plays);
     } catch (error: unknown) {
       const errorMessage = 'Error al cargar las obras';
       throw new Error(errorMessage);

@@ -1,5 +1,6 @@
-import { ButtonLogout, ButtonStart } from './buttons';
 import { useAuth } from '@/contexts/AuthContext';
+
+import { ButtonLogout, ButtonStart } from './buttons';
 
 export type DashboardHeaderProps = {
   icon: string | React.ReactNode;
@@ -25,7 +26,11 @@ const colorClasses = {
   },
 } as const;
 
-export const DashboardHeader = ({ icon, title, color = 'blue' }: DashboardHeaderProps) => {
+export const DashboardHeader = ({
+  icon,
+  title,
+  color = 'blue',
+}: DashboardHeaderProps) => {
   const { user } = useAuth();
   const styles = colorClasses[color];
   return (

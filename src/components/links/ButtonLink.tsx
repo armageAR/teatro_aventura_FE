@@ -42,8 +42,11 @@ const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
       classNames,
       ...rest
     },
-    ref
+    ref,
   ) => {
+    // Normalize icon types for React 18 JSX
+    const LeftIconEl = LeftIcon as unknown as React.ElementType | undefined;
+    const RightIconEl = RightIcon as unknown as React.ElementType | undefined;
     return (
       <UnstyledLink
         ref={ref}
@@ -96,51 +99,51 @@ const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
           ],
           //#endregion  //*======== Variants ===========
           'disabled:cursor-not-allowed',
-          className
+          className,
         )}
       >
-        {LeftIcon && (
+        {LeftIconEl && (
           <div
             className={cn([
               size === 'base' && 'mr-1',
               size === 'sm' && 'mr-1.5',
             ])}
           >
-            <LeftIcon
+            <LeftIconEl
               size='1em'
               className={cn(
                 [
                   size === 'base' && 'md:text-md text-md',
                   size === 'sm' && 'md:text-md text-sm',
                 ],
-                classNames?.leftIcon
+                classNames?.leftIcon,
               )}
             />
           </div>
         )}
         {children}
-        {RightIcon && (
+        {RightIconEl && (
           <div
             className={cn([
               size === 'base' && 'ml-1',
               size === 'sm' && 'ml-1.5',
             ])}
           >
-            <RightIcon
+            <RightIconEl
               size='1em'
               className={cn(
                 [
                   size === 'base' && 'text-md md:text-md',
                   size === 'sm' && 'md:text-md text-sm',
                 ],
-                classNames?.rightIcon
+                classNames?.rightIcon,
               )}
             />
           </div>
         )}
       </UnstyledLink>
     );
-  }
+  },
 );
 
 export default ButtonLink;

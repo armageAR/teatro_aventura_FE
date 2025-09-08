@@ -12,6 +12,9 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  // Some TS/React versions flag react-icons as not a JSX component.
+  // Cast to a generic element type to satisfy the checker.
+  const WarningIcon = RiAlarmWarningFill as unknown as React.ElementType;
   React.useEffect(() => {
     // eslint-disable-next-line no-console
     console.error(error);
@@ -21,7 +24,7 @@ export default function Error({
     <main>
       <section className='bg-white'>
         <div className='layout flex min-h-screen flex-col items-center justify-center text-center text-black'>
-          <RiAlarmWarningFill
+          <WarningIcon
             size={60}
             className='drop-shadow-glow animate-flicker text-red-500'
           />

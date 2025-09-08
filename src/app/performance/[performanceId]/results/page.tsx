@@ -57,7 +57,7 @@ export default function PerformanceResultsPage({ params }: Props) {
           answer.answer,
           answer.count.toString(),
           `${answer.percentage.toFixed(1)}%`,
-        ])
+        ]),
       ),
     ]
       .map((row) => row.join(','))
@@ -108,8 +108,8 @@ export default function PerformanceResultsPage({ params }: Props) {
       <div className='min-h-screen bg-purple-50'>
         <PageHeader
           title='Resultados de la Función'
-          subtitle={`${results.performance.play?.titulo || 'Obra'} - ${new Date(
-            results.performance.date
+          subtitle={`${results.performance.play?.title || 'Obra'} - ${new Date(
+            results.performance.date,
           ).toLocaleDateString('es-ES')}`}
           icon='📊'
           backTo='/producer-dashboard/performances'
@@ -146,7 +146,7 @@ export default function PerformanceResultsPage({ params }: Props) {
                   <p className='text-sm text-gray-500'>Fecha y Hora</p>
                   <p className='text-lg font-semibold text-gray-900'>
                     {new Date(results.performance.date).toLocaleDateString(
-                      'es-ES'
+                      'es-ES',
                     )}
                   </p>
                   <p className='text-sm text-gray-600'>
@@ -200,12 +200,12 @@ export default function PerformanceResultsPage({ params }: Props) {
                               answerIndex === 0
                                 ? 'bg-purple-600'
                                 : answerIndex === 1
-                                ? 'bg-blue-600'
-                                : answerIndex === 2
-                                ? 'bg-green-600'
-                                : answerIndex === 3
-                                ? 'bg-yellow-600'
-                                : 'bg-red-600'
+                                  ? 'bg-blue-600'
+                                  : answerIndex === 2
+                                    ? 'bg-green-600'
+                                    : answerIndex === 3
+                                      ? 'bg-yellow-600'
+                                      : 'bg-red-600'
                             }`}
                             style={{ width: `${answer.percentage}%` }}
                           />
@@ -222,7 +222,7 @@ export default function PerformanceResultsPage({ params }: Props) {
                     <span className='font-semibold'>
                       {question.answers.reduce(
                         (sum, answer) => sum + answer.count,
-                        0
+                        0,
                       )}
                     </span>
                   </div>
