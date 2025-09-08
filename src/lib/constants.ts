@@ -1,6 +1,6 @@
 export const constants = {
   api: {
-    base_url: 'http://localhost:8008/api',
+    base_url: 'https://teatroaventurabe.up.railway.app/api',
   },
   roles: {
     routes: {
