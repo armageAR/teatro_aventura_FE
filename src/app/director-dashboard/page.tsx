@@ -17,6 +17,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import QuickActions, { QuickAction } from '@/components/QuickActions';
 import StatCard from '@/components/StatCard';
 import DashboardHeader from '@/components/ui/DashboardHeader';
+import ErrorAlert from '@/components/ui/ErrorAlert';
 import { Spinner } from '@/components/ui/Spinner';
 
 import CapabilitiesByRole from '@/app/components/users/CapabilitiesByRole';
@@ -87,9 +88,7 @@ export default function DirectorDashboard() {
 
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
           {error ? (
-            <div className='bg-red-50 border border-red-200 rounded-md p-4 mb-6'>
-              <p className='text-red-800'>{error}</p>
-            </div>
+            <ErrorAlert message={error} />
           ) : dashboardData ? (
             <>
               {/* Welcome Message */}
