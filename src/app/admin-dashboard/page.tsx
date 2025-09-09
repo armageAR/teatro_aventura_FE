@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  ArrowRightOnRectangleIcon,
   BuildingOfficeIcon,
   ChartBarIcon,
   CogIcon,
@@ -11,8 +10,14 @@ import {
 import React, { useEffect, useState } from 'react';
 
 import { authAPI } from '@/lib/api';
+import constants from '@/lib/constants';
 
 import ProtectedRoute from '@/components/ProtectedRoute';
+import DashboardHeader from '@/components/ui/DashboardHeader';
+import ErrorAlert from '@/components/ui/ErrorAlert';
+import InfoBanner from '@/components/ui/InfoBanner';
+import { Spinner } from '@/components/ui/Spinner';
+import StatsGrid from '@/components/ui/StatsGrid';
 
 import CapabilitiesByRole from '@/app/components/users/CapabilitiesByRole';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,9 +35,9 @@ interface AdminDashboardData {
 }
 
 export default function AdminDashboard() {
-  const { user, logout } = useAuth();
+  useAuth();
   const [dashboardData, setDashboardData] = useState<AdminDashboardData | null>(
-    null
+    null,
   );
   const [totalCompanies, setTotalCompanies] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,7 +56,7 @@ export default function AdminDashboard() {
         // Extraer el array de compañías y contar
         const companiesArray = companiesResponse.companies || companiesResponse;
         setTotalCompanies(
-          Array.isArray(companiesArray) ? companiesArray.length : 0
+          Array.isArray(companiesArray) ? companiesArray.length : 0,
         );
       } catch (error: unknown) {
         setError('Error al cargar los datos del dashboard');
@@ -66,133 +71,61 @@ export default function AdminDashboard() {
   }, []);
 
   if (isLoading) {
-    return (
-      <div className='flex justify-center items-center min-h-screen bg-purple-50'>
-        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600'></div>
-        <span className='ml-3 text-gray-600'>Cargando dashboard...</span>
-      </div>
-    );
+    return <Spinner color='purple' />;
   }
 
   return (
     <ProtectedRoute allowedRoles={['administrador']}>
-      <div className='min-h-screen bg-purple-50'>
-        {/* Header */}
-        <header className='bg-white shadow-sm border-b-4 border-purple-500'>
-          <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-            <div className='flex justify-between items-center py-4'>
-              <div className='flex items-center'>
-                <div className='text-3xl mr-3'>👑</div>
-                <div>
-                  <h1 className='text-2xl font-bold text-purple-800'>
-                    Dashboard Administrador
-                  </h1>
-                  <p className='text-purple-600'>Bienvenido, {user?.name}</p>
-                </div>
-              </div>
-
-              <div className='flex items-center space-x-4'>
-                <button
-                  onClick={() => (window.location.href = '/')}
-                  className='text-gray-600 hover:text-gray-800 px-3 py-2 rounded-md text-sm'
-                >
-                  Inicio
-                </button>
-                <button
-                  onClick={logout}
-                  className='bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 flex items-center'
-                >
-                  <ArrowRightOnRectangleIcon className='h-4 w-4 mr-2' />
-                  Cerrar Sesión
-                </button>
-              </div>
-            </div>
-          </div>
-        </header>
+      <div
+        className={`min-h-screen ${constants.roles.ui.background.administrador}`}
+      >
+        <DashboardHeader
+          icon={constants.roles.emojis.administrador}
+          title='Dashboard Administrador'
+          color={constants.roles.ui.colorKeyByRole.administrador}
+        />
 
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
           {error ? (
-            <div className='bg-red-50 border border-red-200 rounded-md p-4 mb-6'>
-              <p className='text-red-800'>{error}</p>
-            </div>
+            <ErrorAlert message={error} />
           ) : dashboardData ? (
             <>
               {/* Welcome Message */}
-              <div className='bg-white rounded-lg shadow-sm p-6 mb-8 border-l-4 border-purple-500'>
-                <h2 className='text-xl font-semibold text-gray-900 mb-2'>
-                  {dashboardData.message}
-                </h2>
-                <p className='text-gray-600'>
-                  Control total del sistema Teatro de Aventura
-                </p>
-              </div>
+              <InfoBanner
+                title={dashboardData.message}
+                description='Control total del sistema Teatro de Aventura'
+                color={constants.roles.ui.colorKeyByRole.administrador}
+              />
 
               {/* Statistics Cards */}
-              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
-                <div className='bg-white rounded-lg shadow-sm p-6 border-t-4 border-purple-500'>
-                  <div className='flex items-center'>
-                    <div className='flex-shrink-0'>
-                      <UsersIcon className='h-8 w-8 text-purple-600' />
-                    </div>
-                    <div className='ml-4'>
-                      <p className='text-sm font-medium text-gray-500'>
-                        Total Usuarios
-                      </p>
-                      <p className='text-2xl font-bold text-gray-900'>
-                        {dashboardData.statistics.total_users}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className='bg-white rounded-lg shadow-sm p-6 border-t-4 border-blue-500'>
-                  <div className='flex items-center'>
-                    <div className='flex-shrink-0'>
-                      <UserGroupIcon className='h-8 w-8 text-blue-600' />
-                    </div>
-                    <div className='ml-4'>
-                      <p className='text-sm font-medium text-gray-500'>
-                        Total Roles
-                      </p>
-                      <p className='text-2xl font-bold text-gray-900'>
-                        {dashboardData.statistics.total_roles}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className='bg-white rounded-lg shadow-sm p-6 border-t-4 border-green-500'>
-                  <div className='flex items-center'>
-                    <div className='flex-shrink-0'>
-                      <CogIcon className='h-8 w-8 text-green-600' />
-                    </div>
-                    <div className='ml-4'>
-                      <p className='text-sm font-medium text-gray-500'>
-                        Permisos
-                      </p>
-                      <p className='text-2xl font-bold text-gray-900'>
-                        {dashboardData.statistics.total_permissions}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className='bg-white rounded-lg shadow-sm p-6 border-t-4 border-orange-500'>
-                  <div className='flex items-center'>
-                    <div className='flex-shrink-0'>
-                      <BuildingOfficeIcon className='h-8 w-8 text-orange-600' />
-                    </div>
-                    <div className='ml-4'>
-                      <p className='text-sm font-medium text-gray-500'>
-                        Total Compañías
-                      </p>
-                      <p className='text-2xl font-bold text-gray-900'>
-                        {totalCompanies}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <StatsGrid
+                items={[
+                  {
+                    icon: <UsersIcon className='h-8 w-8' />,
+                    title: 'Total Usuarios',
+                    value: dashboardData.statistics.total_users,
+                    color: 'purple',
+                  },
+                  {
+                    icon: <UserGroupIcon className='h-8 w-8' />,
+                    title: 'Total Roles',
+                    value: dashboardData.statistics.total_roles,
+                    color: 'blue',
+                  },
+                  {
+                    icon: <CogIcon className='h-8 w-8' />,
+                    title: 'Permisos',
+                    value: dashboardData.statistics.total_permissions,
+                    color: 'green',
+                  },
+                  {
+                    icon: <BuildingOfficeIcon className='h-8 w-8' />,
+                    title: 'Total Compañías',
+                    value: totalCompanies,
+                    color: 'orange',
+                  },
+                ]}
+              />
 
               {/* Users by Role */}
               <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
@@ -203,20 +136,6 @@ export default function AdminDashboard() {
                   <div className='space-y-4'>
                     {dashboardData.statistics.users_by_role.map(
                       (roleData, index) => {
-                        const roleEmojis: Record<string, string> = {
-                          administrador: '👑',
-                          productor: '🎭',
-                          director: '🎬',
-                          espectador: '👤',
-                        };
-
-                        const roleColors: Record<string, string> = {
-                          administrador: 'bg-purple-100 text-purple-800',
-                          productor: 'bg-red-100 text-red-800',
-                          director: 'bg-blue-100 text-blue-800',
-                          espectador: 'bg-green-100 text-green-800',
-                        };
-
                         return (
                           <div
                             key={index}
@@ -224,7 +143,9 @@ export default function AdminDashboard() {
                           >
                             <div className='flex items-center'>
                               <span className='text-2xl mr-3'>
-                                {roleEmojis[roleData.role] || '🎭'}
+                                {constants.roles.emojis[
+                                  roleData.role as keyof typeof constants.roles.emojis
+                                ] || '🎭'}
                               </span>
                               <span className='font-medium capitalize'>
                                 {roleData.role}
@@ -232,15 +153,16 @@ export default function AdminDashboard() {
                             </div>
                             <span
                               className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                roleColors[roleData.role] ||
-                                'bg-gray-100 text-gray-800'
+                                constants.roles.ui.badge[
+                                  roleData.role as keyof typeof constants.roles.ui.badge
+                                ] || 'bg-gray-100 text-gray-800'
                               }`}
                             >
                               {roleData.count} usuarios
                             </span>
                           </div>
                         );
-                      }
+                      },
                     )}
                   </div>
                 </div>

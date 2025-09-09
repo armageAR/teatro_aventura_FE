@@ -9,15 +9,16 @@ import {
 import React, { useEffect, useState } from 'react';
 
 import { authAPI } from '@/lib/api';
+import constants from '@/lib/constants';
 import { Play } from '@/lib/types/play';
 import { DashboardData } from '@/lib/types/user';
 
 import QuickActionsPanel from '@/components/producer/QuickActionsPanel';
 import RecentActivities from '@/components/producer/RecentActivities';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import StatCard from '@/components/StatCard';
-import { ButtonLogout, ButtonStart } from '@/components/ui/buttons';
+import DashboardHeader from '@/components/ui/DashboardHeader';
 import { Spinner } from '@/components/ui/Spinner';
+import StatsGrid from '@/components/ui/StatsGrid';
 import TopBanner from '@/components/ui/TopBanner';
 
 import CapabilitiesByRole from '@/app/components/users/CapabilitiesByRole';
@@ -25,7 +26,7 @@ import LimitationsByRole from '@/app/components/users/LimitationsByRole';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function ProducerDashboard() {
-  const { user } = useAuth();
+  useAuth();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null,
   );
@@ -64,35 +65,22 @@ export default function ProducerDashboard() {
   }, []);
 
   if (isLoading) {
-    return <Spinner />;
+    return <Spinner color='red' />;
   }
 
   console.log(plays);
 
   return (
     <ProtectedRoute allowedRoles={['productor']}>
-      <div className='min-h-screen bg-red-50'>
+      <div
+        className={`min-h-screen ${constants.roles.ui.background.productor}`}
+      >
         {/* Header */}
-        <header className='bg-white shadow-sm border-b-4 border-red-500'>
-          <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-            <div className='flex justify-between items-center py-4'>
-              <div className='flex items-center'>
-                <div className='text-3xl mr-3'>{dashboardData?.icon}</div>
-                <div>
-                  <h1 className='text-2xl font-bold text-red-800'>
-                    {dashboardData?.title}
-                  </h1>
-                  <p className='text-red-600'>Bienvenido, {user?.name}</p>
-                </div>
-              </div>
-
-              <div className='flex items-center space-x-4'>
-                <ButtonStart />
-                <ButtonLogout />
-              </div>
-            </div>
-          </div>
-        </header>
+        <DashboardHeader
+          icon={dashboardData?.icon || constants.roles.emojis.productor}
+          title={dashboardData?.title || 'Dashboard Productor'}
+          color={constants.roles.ui.colorKeyByRole.productor}
+        />
 
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
           {dashboardData && (
@@ -102,37 +90,38 @@ export default function ProducerDashboard() {
                 title={dashboardData.title}
                 message={dashboardData.message}
                 icon={dashboardData.icon}
-                borderColor='border-red-500'
+                borderColor={constants.roles.ui.border.productor}
               />
 
               {/* Quick Stats */}
-              <div className='grid grid-cols-1 md:grid-cols-4 gap-6 mb-8'>
-                <StatCard
-                  icon={<PlayIcon className='w-5 h-5' />}
-                  title='Mis Obras'
-                  value={3}
-                  color='red'
-                />
-                <StatCard
-                  icon={<CalendarIcon className='h-8 w-8' />}
-                  title='Funciones'
-                  value={12}
-                  color='orange'
-                />
-
-                <StatCard
-                  icon={<UsersIcon className='h-8 w-8' />}
-                  title='Directores'
-                  value={8}
-                  color='blue'
-                />
-                <StatCard
-                  icon={<ChartBarIcon className='h-8 w-8' />}
-                  title='Espectadores'
-                  value={245}
-                  color='green'
-                />
-              </div>
+              <StatsGrid
+                items={[
+                  {
+                    icon: <PlayIcon className='w-5 h-5' />,
+                    title: 'Mis Obras',
+                    value: 3,
+                    color: 'red',
+                  },
+                  {
+                    icon: <CalendarIcon className='h-8 w-8' />,
+                    title: 'Funciones',
+                    value: 12,
+                    color: 'orange',
+                  },
+                  {
+                    icon: <UsersIcon className='h-8 w-8' />,
+                    title: 'Directores',
+                    value: 8,
+                    color: 'blue',
+                  },
+                  {
+                    icon: <ChartBarIcon className='h-8 w-8' />,
+                    title: 'Espectadores',
+                    value: 245,
+                    color: 'green',
+                  },
+                ]}
+              />
 
               {/* Quick Actions */}
               <QuickActionsPanel />

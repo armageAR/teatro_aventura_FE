@@ -10,15 +10,17 @@ import {
 import React, { useEffect, useState } from 'react';
 
 import { authAPI } from '@/lib/api';
+import constants from '@/lib/constants';
 
 import LiveSessionStatus from '@/components/director/LiveSessionStatus';
 import ShowCard from '@/components/director/ShowCard';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import QuickActions, { QuickAction } from '@/components/QuickActions';
-import StatCard from '@/components/StatCard';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import ErrorAlert from '@/components/ui/ErrorAlert';
+import InfoBanner from '@/components/ui/InfoBanner';
 import { Spinner } from '@/components/ui/Spinner';
+import StatsGrid from '@/components/ui/StatsGrid';
 
 import CapabilitiesByRole from '@/app/components/users/CapabilitiesByRole';
 import LimitationsByRole from '@/app/components/users/LimitationsByRole';
@@ -32,8 +34,7 @@ interface DirectorDashboardData {
 }
 
 export default function DirectorDashboard() {
-  const { user } = useAuth();
-  console.log(user);
+  useAuth();
   const [dashboardData, setDashboardData] =
     useState<DirectorDashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -82,9 +83,13 @@ export default function DirectorDashboard() {
 
   return (
     <ProtectedRoute allowedRoles={['director']}>
-      <div className='min-h-screen bg-blue-50'>
+      <div className={`min-h-screen ${constants.roles.ui.background.director}`}>
         {/* Header */}
-        <DashboardHeader icon='🎬' title='Dashboard Director' color='blue' />
+        <DashboardHeader
+          icon={constants.roles.emojis.director}
+          title='Dashboard Director'
+          color={constants.roles.ui.colorKeyByRole.director}
+        />
 
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
           {error ? (
@@ -92,42 +97,41 @@ export default function DirectorDashboard() {
           ) : dashboardData ? (
             <>
               {/* Welcome Message */}
-              <div className='bg-white rounded-lg shadow-sm p-6 mb-8 border-l-4 border-blue-500'>
-                <h2 className='text-xl font-semibold text-gray-900 mb-2'>
-                  {dashboardData.message}
-                </h2>
-                <p className='text-gray-600'>
-                  Dirige funciones interactivas en tiempo real
-                </p>
-              </div>
+              <InfoBanner
+                title={dashboardData.message}
+                description='Dirige funciones interactivas en tiempo real'
+                color={constants.roles.ui.colorKeyByRole.director}
+              />
 
               {/* Quick Stats */}
-              <div className='grid grid-cols-1 md:grid-cols-4 gap-6 mb-8'>
-                <StatCard
-                  icon={<FilmIcon className='h-5 w-5' />}
-                  title='Obras Asignadas'
-                  value={5}
-                  color='blue'
-                />
-                <StatCard
-                  icon={<QuestionMarkCircleIcon className='h-5 w-5' />}
-                  title='Preguntas Creadas'
-                  value={42}
-                  color='green'
-                />
-                <StatCard
-                  icon={<EyeIcon className='h-5 w-5' />}
-                  title='Funciones Dirigidas'
-                  value={18}
-                  color='purple'
-                />
-                <StatCard
-                  icon={<DocumentArrowDownIcon className='h-5 w-5' />}
-                  title='Reportes PDF'
-                  value={12}
-                  color='orange'
-                />
-              </div>
+              <StatsGrid
+                items={[
+                  {
+                    icon: <FilmIcon className='h-5 w-5' />,
+                    title: 'Obras Asignadas',
+                    value: 5,
+                    color: 'blue',
+                  },
+                  {
+                    icon: <QuestionMarkCircleIcon className='h-5 w-5' />,
+                    title: 'Preguntas Creadas',
+                    value: 42,
+                    color: 'green',
+                  },
+                  {
+                    icon: <EyeIcon className='h-5 w-5' />,
+                    title: 'Funciones Dirigidas',
+                    value: 18,
+                    color: 'purple',
+                  },
+                  {
+                    icon: <DocumentArrowDownIcon className='h-5 w-5' />,
+                    title: 'Reportes PDF',
+                    value: 12,
+                    color: 'orange',
+                  },
+                ]}
+              />
 
               {/* Main Content Grid */}
               <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
