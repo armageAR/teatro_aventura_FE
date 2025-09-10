@@ -1,7 +1,4 @@
 export const constants = {
-  api: {
-    base_url: 'https://teatroaventurabe.up.railway.app/api',
-  },
   roles: {
     routes: {
       administrador: '/admin-dashboard',

@@ -1,6 +1,8 @@
 import { User } from '@/lib/types/user';
 
-export const API_BASE_URL = 'https://teatroaventurabe.up.railway.app/api';
+// Uses NEXT_PUBLIC_ prefix to be available on the client
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8008/api';
 
 export interface ResetPasswordData {
   password: string;
