@@ -258,10 +258,7 @@ export const authAPI = {
 
   // Endpoints para gestión de obras
   getPlays: async (): Promise<PlaysResponse> => {
-    // Si hay token, usar el endpoint protegido que filtra por compañía
-    const token = localStorage.getItem('token');
-    const endpoint = token ? '/plays' : '/plays';
-    const response = await api.get(endpoint);
+    const response = await api.get('/plays');
     return response.data;
   },
 

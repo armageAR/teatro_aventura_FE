@@ -2,7 +2,6 @@
 
 import {
   ChartBarIcon,
-  DocumentArrowDownIcon,
   EyeIcon,
   FilmIcon,
   QuestionMarkCircleIcon,
@@ -12,13 +11,12 @@ import React, { useEffect, useState } from 'react';
 import { authAPI } from '@/lib/api';
 import constants from '@/lib/constants';
 
+import AssignedShows from '@/components/director/AssignedShows';
 import LiveSessionStatus from '@/components/director/LiveSessionStatus';
-import ShowCard from '@/components/director/ShowCard';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import QuickActions, { QuickAction } from '@/components/QuickActions';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import ErrorAlert from '@/components/ui/ErrorAlert';
-import InfoBanner from '@/components/ui/InfoBanner';
 import { Spinner } from '@/components/ui/Spinner';
 import StatsGrid from '@/components/ui/StatsGrid';
 
@@ -91,17 +89,15 @@ export default function DirectorDashboard() {
           color={constants.roles.ui.colorKeyByRole.director}
         />
 
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
           {error ? (
             <ErrorAlert message={error} />
           ) : dashboardData ? (
             <>
-              {/* Welcome Message */}
-              <InfoBanner
-                title={dashboardData.message}
-                description='Dirige funciones interactivas en tiempo real'
-                color={constants.roles.ui.colorKeyByRole.director}
-              />
+              {/* Quick Actions */}
+              <div className='mb-8'>
+                <QuickActions actions={actions} />
+              </div>
 
               {/* Quick Stats */}
               <StatsGrid
@@ -124,20 +120,8 @@ export default function DirectorDashboard() {
                     value: 18,
                     color: 'purple',
                   },
-                  {
-                    icon: <DocumentArrowDownIcon className='h-5 w-5' />,
-                    title: 'Reportes PDF',
-                    value: 12,
-                    color: 'orange',
-                  },
                 ]}
               />
-
-              {/* Main Content Grid */}
-              <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
-                <CapabilitiesByRole capabilities={dashboardData.capabilities} />
-                <LimitationsByRole limitations={dashboardData.limitations} />
-              </div>
 
               {/* Live Session Status */}
               <LiveSessionStatus
@@ -147,34 +131,14 @@ export default function DirectorDashboard() {
                 questionCount={8}
               />
 
-              {/* Quick Actions */}
-              <QuickActions actions={actions} />
-
               {/* Assigned Shows */}
-              <div className='mt-8 bg-white rounded-lg shadow-sm p-6'>
-                <h3 className='text-lg font-semibold text-gray-900 mb-4'>
-                  Obras Asignadas
-                </h3>
-                <div className='space-y-4'>
-                  <ShowCard
-                    title='Romeo y Julieta 2.0'
-                    subtitle='Drama interactivo • 8 preguntas'
-                    status='active'
-                    actionLabel='Gestionar'
-                  />
-                  <ShowCard
-                    title='El Misterio del Teatro'
-                    subtitle='Misterio • 12 preguntas'
-                    status='preparation'
-                    actionLabel='Gestionar'
-                  />
-                  <ShowCard
-                    title='La Casa Encantada'
-                    subtitle='Terror • 6 preguntas'
-                    status='finished'
-                    actionLabel='Ver Reporte'
-                  />
-                </div>
+              <div className='my-8'>
+                <AssignedShows />
+              </div>
+
+              <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
+                <CapabilitiesByRole capabilities={dashboardData.capabilities} />
+                <LimitationsByRole limitations={dashboardData.limitations} />
               </div>
             </>
           ) : null}
