@@ -37,6 +37,8 @@ export default function DirectorDashboard() {
     useState<DirectorDashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [assignedPlaysCount, setAssignedPlaysCount] = useState<number>(0);
+  const [avgQuestionsPerPlay, setAvgQuestionsPerPlay] = useState<number>(0);
   const actions: QuickAction[] = [
     {
       icon: <QuestionMarkCircleIcon className='h-5 w-5' />,
@@ -61,8 +63,55 @@ export default function DirectorDashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const data = await authAPI.getDirectorDashboard();
-        setDashboardData(data);
+        const [dashboard, playsResponse] = await Promise.all([
+          authAPI.getDirectorDashboard(),
+          authAPI.getPlays(),
+        ]);
+        setDashboardData(dashboard);
+
+        // Extract plays array in a tolerant way
+        const extractPlays = (data: unknown) => {
+          if (Array.isArray(data)) return data as Array<unknown>;
+          if (data && typeof data === 'object') {
+            const obj = data as Record<string, unknown>;
+            if (Array.isArray(obj.plays)) return obj.plays as Array<unknown>;
+            if (Array.isArray(obj.data)) return obj.data as Array<unknown>;
+          }
+          return [] as Array<unknown>;
+        };
+        const playsArray = extractPlays(playsResponse);
+        setAssignedPlaysCount(playsArray.length);
+
+        // Compute average questions per assigned play
+        const playIds = playsArray
+          .map((p) =>
+            p && typeof p === 'object' ? (p as { id?: unknown }).id : undefined,
+          )
+          .filter((id): id is number => typeof id === 'number');
+
+        if (playIds.length > 0) {
+          const questionResponses = await Promise.all(
+            playIds.map((id) => authAPI.getQuestions(id)),
+          );
+          const getQuestionsCount = (resp: unknown): number => {
+            if (resp && typeof resp === 'object') {
+              const obj = resp as Record<string, unknown>;
+              if (Array.isArray(obj.questions)) return obj.questions.length;
+              if (Array.isArray(obj.data)) return obj.data.length;
+            }
+            return 0;
+          };
+          const totalQuestions = questionResponses.reduce(
+            (sum, r) => sum + getQuestionsCount(r),
+            0,
+          );
+          const avg = totalQuestions / playIds.length;
+          setAvgQuestionsPerPlay(
+            Number.isFinite(avg) ? Number(avg.toFixed(1)) : 0,
+          );
+        } else {
+          setAvgQuestionsPerPlay(0);
+        }
       } catch (error: unknown) {
         setError('Error al cargar los datos del dashboard');
         // eslint-disable-next-line no-console
@@ -105,20 +154,14 @@ export default function DirectorDashboard() {
                   {
                     icon: <FilmIcon className='h-5 w-5' />,
                     title: 'Obras Asignadas',
-                    value: 5,
+                    value: assignedPlaysCount,
                     color: 'blue',
                   },
                   {
                     icon: <QuestionMarkCircleIcon className='h-5 w-5' />,
-                    title: 'Preguntas Creadas',
-                    value: 42,
+                    title: 'Promedio Preguntas/Obra',
+                    value: avgQuestionsPerPlay,
                     color: 'green',
-                  },
-                  {
-                    icon: <EyeIcon className='h-5 w-5' />,
-                    title: 'Funciones Dirigidas',
-                    value: 18,
-                    color: 'purple',
                   },
                 ]}
               />
