@@ -8,6 +8,7 @@ interface ShowCardProps {
   subtitle: string;
   status: ShowStatus;
   actionLabel: string;
+  onAction?: () => void;
 }
 
 const statusStyles: Record<ShowStatus, string> = {
@@ -21,6 +22,7 @@ export const ShowCard: React.FC<ShowCardProps> = ({
   subtitle,
   status,
   actionLabel,
+  onAction,
 }) => (
   <div className='flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200'>
     <div className='flex items-center'>
@@ -33,14 +35,19 @@ export const ShowCard: React.FC<ShowCardProps> = ({
       </div>
     </div>
     <div className='flex items-center space-x-2'>
-      <span className={`px-2 py-1 text-xs rounded-full ${statusStyles[status]}`}>{
-        status === 'active'
+      <span
+        className={`px-2 py-1 text-xs rounded-full ${statusStyles[status]}`}
+      >
+        {status === 'active'
           ? 'Activa'
           : status === 'preparation'
-          ? 'En preparación'
-          : 'Finalizada'
-      }</span>
-      <button className='text-blue-600 hover:text-blue-800 text-sm font-medium'>
+            ? 'En preparación'
+            : 'Finalizada'}
+      </span>
+      <button
+        onClick={onAction}
+        className='text-blue-600 hover:text-blue-800 text-sm font-medium'
+      >
         {actionLabel}
       </button>
     </div>
