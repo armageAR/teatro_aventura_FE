@@ -67,9 +67,10 @@ const AssignedShows: React.FC<AssignedShowsProps> = ({
   );
   const [questionTitle, setQuestionTitle] = useState('');
   const [questionBody, setQuestionBody] = useState('');
-  const [answerOptions, setAnswerOptions] = useState<
-    Array<{ text: string; is_correct?: boolean }>
-  >([{ text: '' }, { text: '' }]);
+  const [answerOptions, setAnswerOptions] = useState<Array<{ text: string }>>([
+    { text: '' },
+    { text: '' },
+  ]);
 
   useEffect(() => {
     const extractPlays = (data: unknown): Play[] => {
@@ -214,10 +215,14 @@ const AssignedShows: React.FC<AssignedShowsProps> = ({
     e.preventDefault();
     if (!selectedPlay) return;
     try {
-      const payload = {
-        ...perfForm,
-        time: normalizeTimeForApi(perfForm.time),
-      } as FormPerformanceData;
+      // Enviar solo los campos permitidos por el backend (sin is_active)
+      const payload: FormPerformanceData = {
+        date: String(perfForm.date || ''),
+        time: normalizeTimeForApi(perfForm.time) as string,
+      };
+      if (perfForm.location !== undefined) {
+        payload.location = String(perfForm.location || '');
+      }
 
       if (isPerfEditing && currentPerformanceId) {
         await authAPI.updatePerformance(currentPerformanceId, payload);
@@ -261,10 +266,7 @@ const AssignedShows: React.FC<AssignedShowsProps> = ({
     setAnswerOptions(
       (q.options || []).map((o) => {
         const r = o as Record<string, unknown>;
-        return {
-          text: (r.text as string) || ((r.answer as string) ?? ''),
-          is_correct: (r.is_correct as boolean) || false,
-        };
+        return { text: (r.text as string) || ((r.answer as string) ?? '') };
       }),
     );
     setIsQuestionFormOpen(true);
@@ -471,29 +473,12 @@ const AssignedShows: React.FC<AssignedShowsProps> = ({
                         onChange={(e) =>
                           setAnswerOptions((arr) => {
                             const copy = [...arr];
-                            copy[idx] = { ...copy[idx], text: e.target.value };
+                            copy[idx] = { text: e.target.value };
                             return copy;
                           })
                         }
                         required
                       />
-                      <label className='text-xs text-gray-700 flex items-center gap-1'>
-                        <input
-                          type='checkbox'
-                          checked={!!opt.is_correct}
-                          onChange={(e) =>
-                            setAnswerOptions((arr) => {
-                              const copy = [...arr];
-                              copy[idx] = {
-                                ...copy[idx],
-                                is_correct: e.target.checked,
-                              };
-                              return copy;
-                            })
-                          }
-                        />
-                        Correcta
-                      </label>
                       <button
                         type='button'
                         className='px-2 py-1 text-xs border rounded text-red-600'
@@ -847,16 +832,19 @@ const ManagePlayModal: React.FC<ManagePlayModalProps> = ({
                     <div className='px-3 pb-3 text-sm'>
                       {q.body && <p className='text-gray-700 mb-2'>{q.body}</p>}
                       <div className='space-y-1'>
-                        {(q.options || []).map((opt, idx) => (
-                          <div key={idx} className='flex items-center gap-2'>
-                            <span className='text-gray-700'>• {opt.text}</span>
-                            {opt.is_correct ? (
-                              <span className='text-xs px-2 py-0.5 rounded bg-green-100 text-green-800'>
-                                correcta
+                        {(q.options || []).map((opt, idx) => {
+                          const o = opt as unknown as {
+                            text?: string;
+                            answer?: string;
+                          };
+                          return (
+                            <div key={idx} className='flex items-center gap-2'>
+                              <span className='text-gray-700'>
+                                • {o.text || o.answer}
                               </span>
-                            ) : null}
-                          </div>
-                        ))}
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   </details>
