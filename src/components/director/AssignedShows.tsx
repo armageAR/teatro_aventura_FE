@@ -6,6 +6,7 @@ import type { FormPerformanceData, Performance } from '@/lib/types/performance';
 import { Play } from '@/lib/types/play';
 import { cn } from '@/lib/utils';
 
+import ManagePlayModalDialog from '@/components/director/ManagePlayModal';
 import ShowCard, { ShowStatus } from '@/components/director/ShowCard';
 import ErrorAlert from '@/components/ui/ErrorAlert';
 import { Spinner } from '@/components/ui/Spinner';
@@ -335,7 +336,7 @@ const AssignedShows: React.FC<AssignedShowsProps> = ({
         </div>
       )}
       {isManageOpen && selectedPlay && (
-        <ManagePlayModal
+        <ManagePlayModalDialog
           play={selectedPlay}
           isLoading={isModalLoading}
           performances={performances}
@@ -617,7 +618,8 @@ const SectionTitle: React.FC<{ title: string; icon?: string }> = ({
   </h4>
 );
 
-const ManagePlayModal: React.FC<ManagePlayModalProps> = ({
+// eslint-disable-next-line unused-imports/no-unused-vars
+const LegacyManagePlayModal: React.FC<ManagePlayModalProps> = ({
   play,
   isLoading,
   performances,

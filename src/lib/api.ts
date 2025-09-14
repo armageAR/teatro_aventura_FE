@@ -441,6 +441,27 @@ export const authAPI = {
     const response = await api.get(`/performances/${performanceId}/current`);
     return response.data;
   },
+  // Conteo de espectadores registrados por performance (tolerante a diferentes respuestas)
+  getPerformanceSpectatorsCount: async (
+    performanceId: number,
+  ): Promise<number> => {
+    try {
+      const response = await api.get(
+        `/performances/${performanceId}/spectators`,
+      );
+      const data = response.data as unknown;
+      if (data && typeof data === 'object') {
+        const obj = data as Record<string, unknown>;
+        if (typeof obj.count === 'number') return obj.count as number;
+        if (Array.isArray(obj.spectators))
+          return (obj.spectators as unknown[]).length;
+        if (Array.isArray(obj.data)) return (obj.data as unknown[]).length;
+      }
+      return 0;
+    } catch (_) {
+      return 0;
+    }
+  },
   getPerformanceQR: async (performanceId: number): Promise<QRInfoResponse> => {
     const response = await api.get(`/performances/${performanceId}/qr`);
     return response.data;

@@ -10,9 +10,12 @@ import React, { useEffect, useState } from 'react';
 
 import { authAPI } from '@/lib/api';
 import constants from '@/lib/constants';
+import type { Performance } from '@/lib/types/performance';
+import type { Play } from '@/lib/types/play';
 
 import AssignedShows from '@/components/director/AssignedShows';
 import LiveSessionStatus from '@/components/director/LiveSessionStatus';
+import ManagePlayModal from '@/components/director/ManagePlayModal';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import QuickActions, { QuickAction } from '@/components/QuickActions';
 import DashboardHeader from '@/components/ui/DashboardHeader';
@@ -39,6 +42,19 @@ export default function DirectorDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [assignedPlaysCount, setAssignedPlaysCount] = useState<number>(0);
   const [avgQuestionsPerPlay, setAvgQuestionsPerPlay] = useState<number>(0);
+  // Manage modal (shared with LiveSessionStatus)
+  const [isManageOpen, setIsManageOpen] = useState(false);
+  const [isModalLoading, setIsModalLoading] = useState(false);
+  const [selectedPlay, setSelectedPlay] = useState<Play | null>(null);
+  const [performances, setPerformances] = useState<Performance[]>([]);
+  const [questions, setQuestions] = useState<
+    Array<{
+      id: number;
+      title: string;
+      body: string | null;
+      options?: Array<{ id?: number; text: string }>;
+    }>
+  >([]);
   const actions: QuickAction[] = [
     {
       icon: <QuestionMarkCircleIcon className='h-5 w-5' />,
@@ -168,16 +184,128 @@ export default function DirectorDashboard() {
 
               {/* Live Session Status */}
               <LiveSessionStatus
-                play='"Romeo y Julieta 2.0"'
-                showTime='Hoy, 20:00'
-                expectedViewers={156}
-                questionCount={8}
+                onManagePlay={async (playId: number) => {
+                  try {
+                    setIsModalLoading(true);
+                    setIsManageOpen(true);
+                    const playResp = await authAPI.getPlay(playId);
+                    const play = (() => {
+                      if (playResp && typeof playResp === 'object') {
+                        const obj = playResp as unknown as Record<
+                          string,
+                          unknown
+                        >;
+                        if (obj.data && typeof obj.data === 'object')
+                          return obj.data as Play;
+                        if (obj.obra && typeof obj.obra === 'object')
+                          return obj.obra as Play;
+                      }
+                      return {
+                        id: playId,
+                        title: `Obra ${playId}`,
+                        description: '',
+                        release_date: '',
+                        created_at: '',
+                        updated_at: '',
+                      } as unknown as Play;
+                    })();
+                    setSelectedPlay(play);
+                    const perfResp = await authAPI.getPlayPerformances(playId);
+                    const perfs = (() => {
+                      if (Array.isArray(perfResp))
+                        return perfResp as Performance[];
+                      if (perfResp && typeof perfResp === 'object') {
+                        const obj = perfResp as unknown as Record<
+                          string,
+                          unknown
+                        >;
+                        if (Array.isArray(obj.performances))
+                          return obj.performances as Performance[];
+                      }
+                      return [] as Performance[];
+                    })();
+                    setPerformances(perfs);
+                    const qResp = await authAPI.getQuestions(playId);
+                    type RawOption = { text?: string; answer?: string };
+                    type RawQuestion = {
+                      id: number;
+                      title?: string;
+                      question?: string;
+                      body?: string | null;
+                      options?: RawOption[];
+                      answers?: RawOption[];
+                    };
+                    const qsSource: RawQuestion[] = (() => {
+                      if (qResp && typeof qResp === 'object') {
+                        const obj = qResp as Record<string, unknown>;
+                        if (Array.isArray(obj.questions))
+                          return obj.questions as RawQuestion[];
+                        if (Array.isArray(obj.data))
+                          return obj.data as RawQuestion[];
+                      }
+                      return [] as RawQuestion[];
+                    })();
+                    const qs = qsSource.map((q) => ({
+                      id: q.id,
+                      title: q.title ?? q.question ?? '',
+                      body: q.body ?? null,
+                      options: (q.options ?? q.answers ?? []).map((o) => ({
+                        text: o.text ?? o.answer ?? '',
+                      })),
+                    }));
+                    setQuestions(qs);
+                  } catch (e) {
+                    console.error('Error abriendo gestión de obra', e);
+                  } finally {
+                    setIsModalLoading(false);
+                  }
+                }}
               />
 
               {/* Assigned Shows */}
               <div className='my-8'>
                 <AssignedShows />
               </div>
+
+              {isManageOpen && selectedPlay && (
+                <ManagePlayModal
+                  play={selectedPlay}
+                  isLoading={isModalLoading}
+                  performances={performances}
+                  questions={questions}
+                  onClose={() => setIsManageOpen(false)}
+                  onCreatePerformance={() =>
+                    alert(
+                      'Crear función desde dashboard no implementado. Usa Obras Asignadas.',
+                    )
+                  }
+                  onEditPerformance={() =>
+                    alert(
+                      'Editar función desde dashboard no implementado. Usa Obras Asignadas.',
+                    )
+                  }
+                  onDeletePerformance={async () =>
+                    alert(
+                      'Eliminar función desde dashboard no implementado. Usa Obras Asignadas.',
+                    )
+                  }
+                  onCreateQuestion={() =>
+                    alert(
+                      'Crear pregunta desde dashboard no implementado. Usa Obras Asignadas.',
+                    )
+                  }
+                  onEditQuestion={() =>
+                    alert(
+                      'Editar pregunta desde dashboard no implementado. Usa Obras Asignadas.',
+                    )
+                  }
+                  onDeleteQuestion={async () =>
+                    alert(
+                      'Eliminar pregunta desde dashboard no implementado. Usa Obras Asignadas.',
+                    )
+                  }
+                />
+              )}
 
               <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
                 <CapabilitiesByRole capabilities={dashboardData.capabilities} />
