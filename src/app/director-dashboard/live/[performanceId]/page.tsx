@@ -3,6 +3,8 @@
 import {
   ArrowLeftIcon,
   ChartBarIcon,
+  ChevronDownIcon,
+  PaperAirplaneIcon,
   UsersIcon,
 } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
@@ -38,15 +40,6 @@ const extractPerformance = (data: unknown): Performance | null => {
   return data as Performance;
 };
 
-const extractQuestionsCount = (resp: unknown): number => {
-  if (resp && typeof resp === 'object') {
-    const obj = resp as Record<string, unknown>;
-    if (Array.isArray(obj.questions)) return obj.questions.length;
-    if (Array.isArray(obj.data)) return obj.data.length;
-  }
-  return 0;
-};
-
 const LivePerformancePage: React.FC<LivePerformancePageProps> = ({
   params,
 }) => {
@@ -54,6 +47,20 @@ const LivePerformancePage: React.FC<LivePerformancePageProps> = ({
   const [performance, setPerformance] = useState<Performance | null>(null);
   const [questionsCount, setQuestionsCount] = useState<number>(0);
   const [spectatorsCount, setSpectatorsCount] = useState<number>(0);
+  const [questions, setQuestions] = useState<
+    Array<{
+      id: number;
+      title: string;
+      body: string | null;
+      options: Array<{ id?: number; text: string }>;
+    }>
+  >([]);
+  const [expandedQuestions, setExpandedQuestions] = useState<
+    Record<number, boolean>
+  >({});
+  const [sendingQuestionId, setSendingQuestionId] = useState<number | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -80,14 +87,63 @@ const LivePerformancePage: React.FC<LivePerformancePageProps> = ({
 
         setPerformance(perf);
 
-        const [qCount, spectators] = await Promise.all([
-          authAPI
-            .getQuestions(perf.play_id)
-            .then(extractQuestionsCount)
-            .catch(() => 0),
+        const [questionsResp, spectators] = await Promise.all([
+          authAPI.getQuestions(perf.play_id).catch(() => ({ questions: [] })),
           authAPI.getPerformanceSpectatorsCount(perf.id).catch(() => 0),
         ]);
-        setQuestionsCount(qCount);
+
+        const normalizeQuestions = (raw: unknown): typeof questions => {
+          const arraySource = (() => {
+            if (Array.isArray(raw)) return raw;
+            if (raw && typeof raw === 'object') {
+              const obj = raw as Record<string, unknown>;
+              if (Array.isArray(obj.questions)) return obj.questions;
+              if (Array.isArray(obj.data)) return obj.data;
+            }
+            return [];
+          })();
+
+          return arraySource.map((item) => {
+            const rec = item as Record<string, unknown>;
+            const rawOptions =
+              (rec.options as unknown[]) ?? (rec.answers as unknown[]) ?? [];
+            return {
+              id: Number(rec.id) || 0,
+              title:
+                (rec.title as string) ||
+                (rec.question as string) ||
+                `Pregunta ${(rec.id as number) ?? ''}`,
+              body:
+                typeof rec.body === 'string'
+                  ? rec.body
+                  : ((rec.description as string) ?? null),
+              options: rawOptions.map((opt) => {
+                const optionRecord = opt as Record<string, unknown>;
+                const text =
+                  (optionRecord.text as string) ||
+                  (optionRecord.answer as string) ||
+                  '';
+                return {
+                  id: optionRecord.id as number | undefined,
+                  text,
+                };
+              }),
+            };
+          });
+        };
+
+        const questionArray = normalizeQuestions(questionsResp);
+
+        setQuestions(questionArray);
+        setExpandedQuestions((prev) => {
+          if (Object.keys(prev).length > 0) return prev;
+          return questionArray.reduce<Record<number, boolean>>((acc, q) => {
+            acc[q.id] = false;
+            return acc;
+          }, {});
+        });
+
+        setQuestionsCount(questionArray.length);
         setSpectatorsCount(spectators);
       } catch (err) {
         console.error('Error loading live performance', err);
@@ -102,11 +158,6 @@ const LivePerformancePage: React.FC<LivePerformancePageProps> = ({
 
   const handleBackToDashboard = () => {
     router.push('/director-dashboard');
-  };
-
-  const handleGoToResults = () => {
-    if (!performance) return;
-    router.push(`/performance/${performance.id}/results`);
   };
 
   const startedAt = performance?.started_at
@@ -132,6 +183,27 @@ const LivePerformancePage: React.FC<LivePerformancePageProps> = ({
       })
     : 'Fecha no disponible';
   const scheduledTime = performance ? formatPerformanceTime(performance) : '';
+
+  const toggleQuestion = (questionId: number) => {
+    setExpandedQuestions((prev) => ({
+      ...prev,
+      [questionId]: !prev[questionId],
+    }));
+  };
+
+  const handleSendQuestion = async (questionId: number) => {
+    if (!performance) return;
+    setSendingQuestionId(questionId);
+    try {
+      await authAPI.sendLiveQuestion(performance.id, questionId);
+      toast.success('Pregunta enviada al público');
+    } catch (err) {
+      console.error('Error enviando pregunta en vivo', err);
+      toast.error('No se pudo enviar la pregunta');
+    } finally {
+      setSendingQuestionId(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -178,7 +250,6 @@ const LivePerformancePage: React.FC<LivePerformancePageProps> = ({
               En vivo
             </span>
           </div>
-
           <div className='bg-white rounded-xl shadow-md p-6 mb-6'>
             <h1 className='text-2xl font-semibold text-gray-900 mb-2'>
               {performance.play?.title ?? `Obra ${performance.play_id}`}
@@ -226,26 +297,86 @@ const LivePerformancePage: React.FC<LivePerformancePageProps> = ({
             </div>
           </div>
 
-          <div className='bg-white rounded-xl shadow-md p-6'>
+          <div className='bg-white rounded-xl shadow-md p-6 my-6'>
             <h2 className='text-xl font-semibold text-gray-900 mb-4'>
-              Acciones rápidas
+              Preguntas disponibles
             </h2>
-            <div className='flex flex-col sm:flex-row gap-3'>
-              <button
-                onClick={handleGoToResults}
-                className='inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700'
-              >
-                <ChartBarIcon className='h-5 w-5' /> Ver resultados parciales
-              </button>
-              <button
-                onClick={() =>
-                  toast('Vista de control en vivo aún no disponible')
-                }
-                className='inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-gray-100 text-gray-700 font-medium hover:bg-gray-200'
-              >
-                Próximamente: Control en vivo
-              </button>
-            </div>
+            {questions.length === 0 ? (
+              <p className='text-sm text-gray-500'>
+                No hay preguntas configuradas para esta obra.
+              </p>
+            ) : (
+              <ul className='space-y-3'>
+                {questions.map((question) => {
+                  const isExpanded = expandedQuestions[question.id];
+                  const options = question.options || [];
+                  return (
+                    <li
+                      key={question.id}
+                      className='border border-gray-200 rounded-lg overflow-hidden'
+                    >
+                      <button
+                        onClick={() => toggleQuestion(question.id)}
+                        className='w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 text-left'
+                      >
+                        <span className='font-medium text-gray-900'>
+                          {question.title}
+                        </span>
+                        <ChevronDownIcon
+                          className={`h-5 w-5 text-gray-500 transition-transform ${
+                            isExpanded ? 'rotate-180' : ''
+                          }`}
+                        />
+                      </button>
+                      {isExpanded ? (
+                        <div className='px-4 py-3 space-y-3 bg-white'>
+                          {question.body ? (
+                            <p className='text-sm text-gray-700'>
+                              {question.body}
+                            </p>
+                          ) : null}
+                          <div className='space-y-2'>
+                            {options.length === 0 ? (
+                              <p className='text-xs text-gray-500'>
+                                Esta pregunta no tiene opciones configuradas.
+                              </p>
+                            ) : (
+                              options.map((option) => {
+                                const optionText =
+                                  option.text ??
+                                  (option as { answer?: string }).answer ??
+                                  '';
+                                return (
+                                  <div
+                                    key={option.id ?? optionText}
+                                    className='flex items-start gap-2 text-sm text-gray-700'
+                                  >
+                                    <span className='mt-1 h-2 w-2 rounded-full bg-gray-400'></span>
+                                    <span>{optionText}</span>
+                                  </div>
+                                );
+                              })
+                            )}
+                          </div>
+                          <div className='flex justify-end'>
+                            <button
+                              onClick={() => handleSendQuestion(question.id)}
+                              disabled={sendingQuestionId === question.id}
+                              className='inline-flex items-center gap-2 px-3 py-2 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed'
+                            >
+                              <PaperAirplaneIcon className='h-4 w-4' />
+                              {sendingQuestionId === question.id
+                                ? 'Enviando...'
+                                : 'Enviar al público'}
+                            </button>
+                          </div>
+                        </div>
+                      ) : null}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
         </div>
       </div>
