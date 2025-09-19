@@ -16,6 +16,7 @@ import type { Play } from '@/lib/types/play';
 import AssignedShows from '@/components/director/AssignedShows';
 import LiveSessionStatus from '@/components/director/LiveSessionStatus';
 import ManagePlayModal from '@/components/director/ManagePlayModal';
+import UpcomingPerformances from '@/components/director/UpcomingPerformances';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import QuickActions, { QuickAction } from '@/components/QuickActions';
 import DashboardHeader from '@/components/ui/DashboardHeader';
@@ -181,6 +182,10 @@ export default function DirectorDashboard() {
                   },
                 ]}
               />
+
+              <div className='my-8'>
+                <UpcomingPerformances />
+              </div>
 
               {/* Live Session Status */}
               <LiveSessionStatus

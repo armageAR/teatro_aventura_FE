@@ -4,8 +4,14 @@ import { ClockIcon, PlayIcon } from '@heroicons/react/24/outline';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { authAPI } from '@/lib/api';
+import {
+  extractPerformancesFromResponse,
+  formatPerformanceTime,
+  parsePerformanceDateTime,
+} from '@/lib/director/performance-utils';
 import type { Performance } from '@/lib/types/performance';
-import type { Play } from '@/lib/types/play';
+
+import { useAuth } from '@/contexts/AuthContext';
 
 interface NextPerformanceInfo {
   performance: Performance;
@@ -18,29 +24,10 @@ interface LiveSessionStatusProps {
   onManagePlay?: (playId: number) => void;
 }
 
-function parseDate(p: Performance): Date {
-  const hasT = typeof p.date === 'string' && p.date.includes('T');
-  if (hasT) {
-    const d = new Date(p.date);
-    if (!Number.isNaN(d.getTime())) return d;
-  }
-  if (p.time) {
-    const d = new Date(`${p.date}T${p.time}`);
-    if (!Number.isNaN(d.getTime())) return d;
-  }
-  return new Date(p.date);
-}
-
-function timeForDisplay(p: Performance): string {
-  if (p.time && String(p.time).trim()) return String(p.time).slice(0, 5);
-  const d = parseDate(p);
-  if (Number.isNaN(d.getTime())) return '';
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-}
-
 export const LiveSessionStatus: React.FC<LiveSessionStatusProps> = ({
   onManagePlay,
 }) => {
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [nextPerf, setNextPerf] = useState<NextPerformanceInfo | null>(null);
@@ -52,51 +39,44 @@ export const LiveSessionStatus: React.FC<LiveSessionStatusProps> = ({
   }, []);
 
   useEffect(() => {
-    const loadNextPerformance = async () => {
-      try {
-        setIsLoading(true);
-        const playsResp = await authAPI.getPlays();
-        const plays = (() => {
-          if (Array.isArray(playsResp)) return playsResp as Play[];
-          if (playsResp && typeof playsResp === 'object') {
-            const obj = playsResp as unknown as Record<string, unknown>;
-            if (Array.isArray(obj.plays)) return obj.plays as Play[];
-            if (Array.isArray(obj.data)) return obj.data as Play[];
-          }
-          return [] as Play[];
-        })();
+    let isMounted = true;
 
-        const candidateLists = await Promise.all(
-          plays.map(async (p: Play) => {
-            const listResp = await authAPI.getPlayPerformances(p.id);
-            const perfs = (() => {
-              if (Array.isArray(listResp)) return listResp as Performance[];
-              if (listResp && typeof listResp === 'object') {
-                const obj = listResp as unknown as Record<string, unknown>;
-                if (Array.isArray(obj.performances))
-                  return obj.performances as Performance[];
-              }
-              return [] as Performance[];
-            })();
-            return perfs
-              .filter(
-                (pf) =>
-                  pf && !pf.is_active && parseDate(pf).getTime() > Date.now(),
-              )
-              .map((pf) => ({ perf: pf, play: p }));
-          }),
-        );
-        const candidates = candidateLists.flat();
-        if (candidates.length === 0) {
-          setNextPerf(null);
+    const loadNextPerformance = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await authAPI.getPerformances();
+        const performances = extractPerformancesFromResponse(response);
+
+        const nowTimestamp = Date.now();
+        const upcomingCandidates = performances
+          .map((performance) => {
+            const scheduledAt = parsePerformanceDateTime(performance);
+            if (!scheduledAt) return null;
+            return { performance, scheduledAt };
+          })
+          .filter(
+            (
+              item,
+            ): item is {
+              performance: Performance;
+              scheduledAt: Date;
+            } =>
+              Boolean(item) &&
+              !item.performance.is_active &&
+              item.scheduledAt.getTime() >= nowTimestamp,
+          )
+          .sort((a, b) => a.scheduledAt.getTime() - b.scheduledAt.getTime());
+
+        if (upcomingCandidates.length === 0) {
+          if (isMounted) setNextPerf(null);
           return;
         }
 
-        const next = candidates.sort(
-          (a, b) => parseDate(a.perf).getTime() - parseDate(b.perf).getTime(),
-        )[0];
+        const [next] = upcomingCandidates;
 
-        const qResp = await authAPI.getQuestions(next.play.id);
+        const qResp = await authAPI.getQuestions(next.performance.play_id);
         const questionsCount = (() => {
           if (qResp && typeof qResp === 'object') {
             const obj = qResp as Record<string, unknown>;
@@ -107,30 +87,43 @@ export const LiveSessionStatus: React.FC<LiveSessionStatusProps> = ({
         })();
 
         const spectatorsCount = await authAPI.getPerformanceSpectatorsCount(
-          next.perf.id,
+          next.performance.id,
         );
 
-        setNextPerf({
-          performance: next.perf,
-          playTitle: next.play.title || `Obra ${next.play.id}`,
-          questionsCount,
-          spectatorsCount,
-        });
+        if (isMounted) {
+          setNextPerf({
+            performance: next.performance,
+            playTitle:
+              next.performance.play?.title ||
+              `Obra ${next.performance.play_id}`,
+            questionsCount,
+            spectatorsCount,
+          });
+        }
       } catch (e) {
         // eslint-disable-next-line no-console
         console.error('Error loading next performance', e);
-        setError('No se pudo cargar la próxima función');
+        if (isMounted) {
+          setError('No se pudo cargar la próxima función');
+          setNextPerf(null);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
     loadNextPerformance();
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.id]);
 
   const countdown = useMemo(() => {
     if (!nextPerf) return null;
-    const target = parseDate(nextPerf.performance).getTime();
+    const scheduled = parsePerformanceDateTime(nextPerf.performance);
+    if (!scheduled) return null;
+    const target = scheduled.getTime();
     const diff = Math.max(0, target - now.getTime());
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
@@ -138,6 +131,19 @@ export const LiveSessionStatus: React.FC<LiveSessionStatusProps> = ({
     const seconds = Math.floor((diff / 1000) % 60);
     return { days, hours, minutes, seconds };
   }, [nextPerf, now]);
+
+  const scheduledAt = nextPerf
+    ? parsePerformanceDateTime(nextPerf.performance)
+    : null;
+  const dateLabel = scheduledAt
+    ? scheduledAt.toLocaleDateString('es-ES', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+      })
+    : null;
+  const timeLabel = nextPerf ? formatPerformanceTime(nextPerf.performance) : '';
+  const locationLabel = nextPerf?.performance.location?.trim() ?? '';
 
   const handleStart = async () => {
     if (!nextPerf) return;
@@ -169,9 +175,10 @@ export const LiveSessionStatus: React.FC<LiveSessionStatusProps> = ({
           <div className='bg-white bg-opacity-20 rounded-lg p-4 md:col-span-2'>
             <p className='text-sm opacity-90'>Obra</p>
             <p className='font-semibold text-lg'>{nextPerf.playTitle}</p>
-            <p className='text-sm opacity-75'>
-              {new Date(nextPerf.performance.date).toLocaleDateString('es-ES')}{' '}
-              • {timeForDisplay(nextPerf.performance)}
+            <p className='text-sm opacity-75 capitalize'>
+              {dateLabel ?? 'Fecha no disponible'} •{' '}
+              {timeLabel ? `${timeLabel} hs` : 'Horario no definido'}
+              {locationLabel ? ` · ${locationLabel}` : ''}
             </p>
           </div>
           <div className='bg-white bg-opacity-20 rounded-lg p-4'>
