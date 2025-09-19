@@ -70,6 +70,7 @@ export default function PerformancesManagement() {
           date: combinedDateTime,
           time: formData.time,
           location: formData.location,
+          is_active: false,
         };
 
         await authAPI.createPerformance(createData);

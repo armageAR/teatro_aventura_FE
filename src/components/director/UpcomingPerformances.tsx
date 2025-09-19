@@ -33,7 +33,13 @@ const timeFormatter = new Intl.DateTimeFormat('es-ES', {
   minute: '2-digit',
 });
 
-const UpcomingPerformances: React.FC = () => {
+interface UpcomingPerformancesProps {
+  refreshKey?: number;
+}
+
+const UpcomingPerformances: React.FC<UpcomingPerformancesProps> = ({
+  refreshKey,
+}) => {
   const { user } = useAuth();
   const [items, setItems] = useState<UpcomingPerformanceItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,6 +60,7 @@ const UpcomingPerformances: React.FC = () => {
         const now = new Date();
         const upcoming = performanceList
           .map((performance) => {
+            if (performance.is_active) return null;
             const scheduledAt = parsePerformanceDateTime(performance);
             if (!scheduledAt) return null;
             return {
@@ -103,7 +110,7 @@ const UpcomingPerformances: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [user?.id]);
+  }, [user?.id, refreshKey]);
 
   return (
     <section className='bg-white border border-gray-200 rounded-lg shadow-sm p-6'>

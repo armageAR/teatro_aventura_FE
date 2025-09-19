@@ -8,6 +8,10 @@ export interface Performance {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  started_at?: string | null;
+  ended_at?: string | null;
+  deleted_at?: string | null;
+  created_by?: number;
   play?: {
     id: number;
     title: string;

@@ -232,6 +232,7 @@ const AssignedShows: React.FC<AssignedShowsProps> = ({
         await authAPI.createPerformance({
           ...payload,
           play_id: selectedPlay.id,
+          is_active: false,
         });
         toast.success('Función creada');
       }

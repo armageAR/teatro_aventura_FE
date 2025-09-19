@@ -14,8 +14,9 @@ import type { Performance } from '@/lib/types/performance';
 import type { Play } from '@/lib/types/play';
 
 import AssignedShows from '@/components/director/AssignedShows';
-import LiveSessionStatus from '@/components/director/LiveSessionStatus';
+import LivePerformance from '@/components/director/LivePerformance';
 import ManagePlayModal from '@/components/director/ManagePlayModal';
+import NextPerformance from '@/components/director/NextPerformance';
 import UpcomingPerformances from '@/components/director/UpcomingPerformances';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import QuickActions, { QuickAction } from '@/components/QuickActions';
@@ -43,7 +44,7 @@ export default function DirectorDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [assignedPlaysCount, setAssignedPlaysCount] = useState<number>(0);
   const [avgQuestionsPerPlay, setAvgQuestionsPerPlay] = useState<number>(0);
-  // Manage modal (shared with LiveSessionStatus)
+  // Manage modal (shared with NextPerformance)
   const [isManageOpen, setIsManageOpen] = useState(false);
   const [isModalLoading, setIsModalLoading] = useState(false);
   const [selectedPlay, setSelectedPlay] = useState<Play | null>(null);
@@ -56,6 +57,8 @@ export default function DirectorDashboard() {
       options?: Array<{ id?: number; text: string }>;
     }>
   >([]);
+  const [liveRefreshKey, setLiveRefreshKey] = useState(0);
+  const [upcomingRefreshKey, setUpcomingRefreshKey] = useState(0);
   const actions: QuickAction[] = [
     {
       icon: <QuestionMarkCircleIcon className='h-5 w-5' />,
@@ -184,88 +187,101 @@ export default function DirectorDashboard() {
               />
 
               <div className='my-8'>
-                <UpcomingPerformances />
+                <LivePerformance refreshKey={liveRefreshKey} />
               </div>
 
-              {/* Live Session Status */}
-              <LiveSessionStatus
-                onManagePlay={async (playId: number) => {
-                  try {
-                    setIsModalLoading(true);
-                    setIsManageOpen(true);
-                    const playResp = await authAPI.getPlay(playId);
-                    const play = (() => {
-                      if (playResp && typeof playResp === 'object') {
-                        const obj = playResp as unknown as Record<
-                          string,
-                          unknown
-                        >;
-                        if (obj.data && typeof obj.data === 'object')
-                          return obj.data as Play;
-                        if (obj.obra && typeof obj.obra === 'object')
-                          return obj.obra as Play;
-                      }
-                      return {
-                        id: playId,
-                        title: `Obra ${playId}`,
-                        description: '',
-                        release_date: '',
-                        created_at: '',
-                        updated_at: '',
-                      } as unknown as Play;
-                    })();
-                    setSelectedPlay(play);
-                    const perfResp = await authAPI.getPlayPerformances(playId);
-                    const perfs = (() => {
-                      if (Array.isArray(perfResp))
-                        return perfResp as Performance[];
-                      if (perfResp && typeof perfResp === 'object') {
-                        const obj = perfResp as unknown as Record<
-                          string,
-                          unknown
-                        >;
-                        if (Array.isArray(obj.performances))
-                          return obj.performances as Performance[];
-                      }
-                      return [] as Performance[];
-                    })();
-                    setPerformances(perfs);
-                    const qResp = await authAPI.getQuestions(playId);
-                    type RawOption = { text?: string; answer?: string };
-                    type RawQuestion = {
-                      id: number;
-                      title?: string;
-                      question?: string;
-                      body?: string | null;
-                      options?: RawOption[];
-                      answers?: RawOption[];
-                    };
-                    const qsSource: RawQuestion[] = (() => {
-                      if (qResp && typeof qResp === 'object') {
-                        const obj = qResp as Record<string, unknown>;
-                        if (Array.isArray(obj.questions))
-                          return obj.questions as RawQuestion[];
-                        if (Array.isArray(obj.data))
-                          return obj.data as RawQuestion[];
-                      }
-                      return [] as RawQuestion[];
-                    })();
-                    const qs = qsSource.map((q) => ({
-                      id: q.id,
-                      title: q.title ?? q.question ?? '',
-                      body: q.body ?? null,
-                      options: (q.options ?? q.answers ?? []).map((o) => ({
-                        text: o.text ?? o.answer ?? '',
-                      })),
-                    }));
-                    setQuestions(qs);
-                  } catch (e) {
-                    console.error('Error abriendo gestión de obra', e);
-                  } finally {
-                    setIsModalLoading(false);
+              <div className='my-8'>
+                <NextPerformance
+                  onPerformanceStarted={() => {
+                    setLiveRefreshKey((prev) => prev + 1);
+                    setUpcomingRefreshKey((prev) => prev + 1);
+                  }}
+                  onPerformanceCancelled={() =>
+                    setUpcomingRefreshKey((prev) => prev + 1)
                   }
-                }}
-              />
+                  onManagePlay={async (playId: number) => {
+                    try {
+                      setIsModalLoading(true);
+                      setIsManageOpen(true);
+                      const playResp = await authAPI.getPlay(playId);
+                      const play = (() => {
+                        if (playResp && typeof playResp === 'object') {
+                          const obj = playResp as unknown as Record<
+                            string,
+                            unknown
+                          >;
+                          if (obj.data && typeof obj.data === 'object')
+                            return obj.data as Play;
+                          if (obj.obra && typeof obj.obra === 'object')
+                            return obj.obra as Play;
+                        }
+                        return {
+                          id: playId,
+                          title: `Obra ${playId}`,
+                          description: '',
+                          release_date: '',
+                          created_at: '',
+                          updated_at: '',
+                        } as unknown as Play;
+                      })();
+                      setSelectedPlay(play);
+                      const perfResp =
+                        await authAPI.getPlayPerformances(playId);
+                      const perfs = (() => {
+                        if (Array.isArray(perfResp))
+                          return perfResp as Performance[];
+                        if (perfResp && typeof perfResp === 'object') {
+                          const obj = perfResp as unknown as Record<
+                            string,
+                            unknown
+                          >;
+                          if (Array.isArray(obj.performances))
+                            return obj.performances as Performance[];
+                        }
+                        return [] as Performance[];
+                      })();
+                      setPerformances(perfs);
+                      const qResp = await authAPI.getQuestions(playId);
+                      type RawOption = { text?: string; answer?: string };
+                      type RawQuestion = {
+                        id: number;
+                        title?: string;
+                        question?: string;
+                        body?: string | null;
+                        options?: RawOption[];
+                        answers?: RawOption[];
+                      };
+                      const qsSource: RawQuestion[] = (() => {
+                        if (qResp && typeof qResp === 'object') {
+                          const obj = qResp as Record<string, unknown>;
+                          if (Array.isArray(obj.questions))
+                            return obj.questions as RawQuestion[];
+                          if (Array.isArray(obj.data))
+                            return obj.data as RawQuestion[];
+                        }
+                        return [] as RawQuestion[];
+                      })();
+                      const qs = qsSource.map((q) => ({
+                        id: q.id,
+                        title: q.title ?? q.question ?? '',
+                        body: q.body ?? null,
+                        options: (q.options ?? q.answers ?? []).map((o) => ({
+                          text: o.text ?? o.answer ?? '',
+                        })),
+                      }));
+                      setQuestions(qs);
+                    } catch (e) {
+                      console.error('Error abriendo gestión de obra', e);
+                    } finally {
+                      setIsModalLoading(false);
+                    }
+                  }}
+                />
+              </div>
+
+              <div className='my-8'>
+                <UpcomingPerformances refreshKey={upcomingRefreshKey} />
+              </div>
 
               {/* Assigned Shows */}
               <div className='my-8'>
