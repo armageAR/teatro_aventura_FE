@@ -77,6 +77,7 @@ export interface SpectatorAnswer {
   question_id: number;
   answer_id: number;
   performance_id: number;
+  spectator_session_uuid?: string;
 }
 
 export interface SpectatorAnswerResponse {
@@ -88,6 +89,8 @@ export interface JoinPerformanceResponse {
   message: string;
   performance: Performance;
   spectator_id?: number;
+  spectator_session_uuid?: string;
+  session_uuid?: string;
   questions?: Array<{
     id: number;
     question: string;

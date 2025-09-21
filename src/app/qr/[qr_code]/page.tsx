@@ -6,7 +6,7 @@ import {
   QrCodeIcon,
   UsersIcon,
 } from '@heroicons/react/24/outline';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
@@ -35,6 +35,7 @@ interface FunctionData {
 export default function QRAccessPage() {
   const params = useParams();
   const qrCode = params.qr_code as string;
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [functionData, setFunctionData] = useState<FunctionData | null>(null);
 
@@ -192,6 +193,10 @@ export default function QRAccessPage() {
               )}
 
               <button
+                onClick={() => {
+                  if (!functionData || functionData.status === 'ended') return;
+                  router.push(`/performance/${functionData.performance.id}`);
+                }}
                 className={`px-8 py-3 rounded-lg font-semibold text-white transition-all duration-200 ${
                   functionData.status === 'live'
                     ? 'bg-green-600 hover:bg-green-700 animate-pulse'
