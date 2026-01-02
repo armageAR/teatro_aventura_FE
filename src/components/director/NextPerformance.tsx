@@ -113,9 +113,12 @@ export const NextPerformance: React.FC<NextPerformanceProps> = ({
           ): item is {
             performance: Performance;
             scheduledAt: Date;
-          } =>
-            Boolean(item) &&
-            item.scheduledAt.getTime() >= nowTimestamp - START_TOLERANCE_MS,
+          } => {
+            if (!item) return false;
+            return (
+              item.scheduledAt.getTime() >= nowTimestamp - START_TOLERANCE_MS
+            );
+          },
         )
         .sort((a, b) => a.scheduledAt.getTime() - b.scheduledAt.getTime());
 
