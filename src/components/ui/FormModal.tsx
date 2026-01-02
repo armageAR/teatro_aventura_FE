@@ -28,7 +28,7 @@ export interface FormField {
 }
 
 interface FormModalProps<
-  T extends Record<string, string | number | boolean | undefined>
+  T extends Record<string, string | number | boolean | undefined>,
 > {
   isOpen: boolean;
   onClose: () => void;
@@ -45,7 +45,7 @@ interface FormModalProps<
 }
 
 export function FormModal<
-  T extends Record<string, string | number | boolean | undefined>
+  T extends Record<string, string | number | boolean | undefined>,
 >({
   isOpen,
   onClose,

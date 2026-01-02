@@ -27,7 +27,7 @@ interface SpectatorHistoryData {
 export default function MyHistory() {
   const { user, logout } = useAuth();
   const [historyData, setHistoryData] = useState<SpectatorHistoryData | null>(
-    null
+    null,
   );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

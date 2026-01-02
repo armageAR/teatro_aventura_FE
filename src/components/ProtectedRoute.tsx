@@ -43,7 +43,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Si hay roles permitidos especificados, verificar que el usuario tenga al menos uno
   if (allowedRoles && allowedRoles.length > 0) {
     const hasPermission = roles.some((role) =>
-      allowedRoles.includes(role as UserRole)
+      allowedRoles.includes(role as UserRole),
     );
 
     if (!hasPermission) {

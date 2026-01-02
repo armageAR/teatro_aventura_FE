@@ -57,7 +57,7 @@ export default function CompaniesAdministration() {
       console.error('Error loading companies:', error);
       setCompanies([]); // Asegurar que siempre sea un array
       toast.error(
-        'Error al cargar las compañías. Puede que el endpoint no exista en el backend.'
+        'Error al cargar las compañías. Puede que el endpoint no exista en el backend.',
       );
     } finally {
       setIsLoading(false);
@@ -97,7 +97,7 @@ export default function CompaniesAdministration() {
       if (isEditing && editingCompany) {
         const response = await authAPI.updateCompany(
           editingCompany.id,
-          formData
+          formData,
         );
 
         // Extraer la compañía de la respuesta (puede venir en { company: {...} } o directamente)
@@ -105,8 +105,8 @@ export default function CompaniesAdministration() {
 
         setCompanies(
           companies.map((c) =>
-            c.id === editingCompany.id ? updatedCompany : c
-          )
+            c.id === editingCompany.id ? updatedCompany : c,
+          ),
         );
         toast.success('Compañía actualizada exitosamente');
       } else {
@@ -320,7 +320,7 @@ export default function CompaniesAdministration() {
                         </td>
                         <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
                           {new Date(company.created_at).toLocaleDateString(
-                            'es-ES'
+                            'es-ES',
                           )}
                         </td>
                         <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
@@ -544,8 +544,8 @@ export default function CompaniesAdministration() {
                         ? 'Actualizando...'
                         : 'Creando...'
                       : isEditing
-                      ? 'Actualizar'
-                      : 'Crear Compañía'}
+                        ? 'Actualizar'
+                        : 'Crear Compañía'}
                   </button>
                 </div>
               </form>

@@ -217,7 +217,7 @@ export function UsersTable({
                         onClick={() =>
                           handleChangeUserRole(
                             user.id,
-                            user.roles[0]?.name || ''
+                            user.roles[0]?.name || '',
                           )
                         }
                         className='text-blue-600 hover:text-blue-800 p-1 rounded'

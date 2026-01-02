@@ -95,7 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (errorCode === 'ERR_NETWORK') {
         toast.error(
-          'No se puede conectar al servidor. Verifica que esté funcionando en puerto 8008.'
+          'No se puede conectar al servidor. Verifica que esté funcionando en puerto 8008.',
         );
       } else if (errorResponse?.status === 401) {
         toast.error('Credenciales inválidas');
@@ -103,17 +103,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         toast.error('Datos de login inválidos');
       } else if (errorResponse?.status === 419) {
         toast.error(
-          'Error de seguridad (CSRF). Configura el backend correctamente.'
+          'Error de seguridad (CSRF). Configura el backend correctamente.',
         );
       } else if (errorResponse?.status === 0) {
         toast.error(
-          'Error CORS. Configura el backend para permitir origen localhost:3000'
+          'Error CORS. Configura el backend para permitir origen localhost:3000',
         );
       } else {
         toast.error(
           `Error: ${
             errorResponse?.data?.message || errorMessage || 'Error desconocido'
-          }`
+          }`,
         );
       }
       throw error;

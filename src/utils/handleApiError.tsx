@@ -7,7 +7,7 @@ interface HandleApiErrorOptions {
 
 export function handleApiError(
   error: unknown,
-  options: HandleApiErrorOptions = {}
+  options: HandleApiErrorOptions = {},
 ) {
   const { isEditing = false, entityName = 'registro' } = options;
 
@@ -45,7 +45,7 @@ export function handleApiError(
       toast.error(
         `No tienes permisos para ${
           isEditing ? 'editar' : 'crear'
-        } ${entityName}`
+        } ${entityName}`,
       );
     } else if (status === 403) {
       toast.error('Acceso denegado');
@@ -53,7 +53,7 @@ export function handleApiError(
       toast.error(
         `Error al ${isEditing ? 'actualizar' : 'crear'} el ${entityName}: ${
           axiosError.response.data?.message || axiosError.message
-        }`
+        }`,
       );
     }
   } else {

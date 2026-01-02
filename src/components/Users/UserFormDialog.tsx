@@ -179,8 +179,8 @@ export function UserFormDialog({
                   ? 'Actualizando...'
                   : 'Creando...'
                 : isEditing
-                ? 'Actualizar Usuario'
-                : 'Crear Usuario'}
+                  ? 'Actualizar Usuario'
+                  : 'Crear Usuario'}
             </button>
           </DialogFooter>
         </form>

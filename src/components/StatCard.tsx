@@ -27,7 +27,7 @@ export const StatCard: React.FC<StatCardProps> = ({
     <div
       className={cn(
         'bg-white rounded-md shadow-sm p-5 border-t-4 flex items-center space-x-4',
-        colorClasses[color]
+        colorClasses[color],
       )}
     >
       <div className={cn('text-2xl', colorClasses[color])}>{icon}</div>

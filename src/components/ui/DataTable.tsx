@@ -115,8 +115,8 @@ export function DataTable<T extends { id: number }>({
                       {column.key === 'actions' && actions
                         ? actions(item)
                         : column.render
-                        ? column.render(item, item[column.key as keyof T])
-                        : String(item[column.key as keyof T] || '')}
+                          ? column.render(item, item[column.key as keyof T])
+                          : String(item[column.key as keyof T] || '')}
                     </td>
                   ))}
                 </tr>
@@ -164,7 +164,7 @@ export function DataTable<T extends { id: number }>({
             <div className='flex space-x-1'>
               {Array.from(
                 { length: pagination.last_page },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map((page) => (
                 <button
                   key={page}

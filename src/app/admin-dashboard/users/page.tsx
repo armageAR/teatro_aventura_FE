@@ -176,8 +176,8 @@ export default function UsersAdministration() {
         // Actualizar el usuario en la lista
         setUsers(
           users.map((user) =>
-            user.id === editingUser.id ? response.user : user
-          )
+            user.id === editingUser.id ? response.user : user,
+          ),
         );
 
         // Si el rol cambió, actualizarlo también
@@ -264,7 +264,7 @@ export default function UsersAdministration() {
   const handleChangeUserRole = async (userId: number, currentRole: string) => {
     const newRole = prompt(
       `Cambiar rol del usuario (actual: ${currentRole}):`,
-      currentRole
+      currentRole,
     );
     if (!newRole || newRole === currentRole) return;
 
@@ -272,8 +272,8 @@ export default function UsersAdministration() {
       const response = await authAPI.changeUserRole(userId, { role: newRole });
       setUsers(
         users.map((user) =>
-          user.id === userId ? { ...user, roles: [{ name: newRole }] } : user
-        )
+          user.id === userId ? { ...user, roles: [{ name: newRole }] } : user,
+        ),
       );
       toast.success(response.message || 'Rol actualizado exitosamente');
     } catch (error) {
